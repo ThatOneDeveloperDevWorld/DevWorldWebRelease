@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Dev World</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #5ce1e6;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #212529;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .clouds-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            border: 4px solid #000000;
+            border-radius: 20px;
+            box-shadow: 0 8px 0px #000000;
+            padding: 30px 20px;
+            text-align: left;
+        }
+
+        .logo-img {
+            max-width: 160px;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto 15px auto;
+            filter: drop-shadow(3px 3px 0px #000);
+        }
+
+        .header-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 900;
+            margin: 0 0 5px 0;
+        }
+
+        .uid-badge {
+            text-align: center;
+            font-size: 11px;
+            font-family: monospace;
+            background: #e9ecef;
+            border: 1px dashed #000;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+
+        .label-title {
+            font-size: 11px;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #f8f9fa;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .btn-custom {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            transition: transform 0.1s ease;
+            margin-bottom: 12px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-custom:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .btn-save { background: #48cae4; color: #000; }
+        .btn-home { background: #55ff55; color: #000; }
+        .btn-logout { background: #ff595e; color: #fff; margin-bottom: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="clouds-bg"></div>
+
+    <div class="main-container">
+        <img src="Devworldlogobeta.png" alt="Dev World Logo" class="logo-img">
+        
+        <h3 id="welcome-user" class="header-title">Loading...</h3>
+        <div id="uid-display" class="uid-badge">ID: Loading...</div>
+        
+        <label class="label-title">USERNAME</label>
+        <input type="text" id="username-input" class="input-field" placeholder="Username">
+        
+        <label class="label-title">BIO</label>
+        <textarea id="bio-input" class="input-field" rows="3" placeholder="Tell us about yourself..."></textarea>
+        
+        <button id="save-btn" class="btn-custom btn-save">Save Profile</button>
+        <button id="home-btn" class="btn-custom btn-home">Home</button>
+        <button id="logout-btn" class="btn-custom btn-logout">Log Out</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById("uid-display").innerText = "ID: " + user.uid;
+
+                db.collection("users").doc(user.uid).get().then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById("username-input").value = data.Username || "";
+                        document.getElementById("bio-input").value = data.Bio || "";
+                        document.getElementById("welcome-user").innerText = data.Username || "Creator Profile";
+                    } else {
+                        db.collection("users").doc(user.uid).set({
+                            Username: "DevWorldUser",
+                            Bio: "Building awesome games!",
+                            Projects: []
+                        }, { merge: true });
+                        
+                        document.getElementById("welcome-user").innerText = "DevWorldUser";
+                    }
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        document.getElementById("save-btn").addEventListener("click", () => {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                const newUsername = document.getElementById("username-input").value;
+                const newBio = document.getElementById("bio-input").value;
+
+                db.collection("users").doc(user.uid).set({
+                    Username: newUsername,
+                    Bio: newBio
+                }, { merge: true })
+                .then(() => {
+                    document.getElementById("welcome-user").innerText = newUsername;
+                    alert("Profile updated successfully!");
+                })
+                .catch((error) => {
+                    alert("Error saving: " + error.message);
+                });
+            }
+        });
+
+        document.getElementById("home-btn").addEventListener("click", () => {
+            window.location.href = "home.html";
+        });
+
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            firebase.auth().signOut().then(() => {
+                window.location.href = "index.html";
+            });
+        });
+    </script>
+</body>
+            </html>
+            
