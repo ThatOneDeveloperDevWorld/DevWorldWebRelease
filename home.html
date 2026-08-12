@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev World - Home</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #5ce1e6;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #212529;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .clouds-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 440px;
+            background: #ffffff;
+            border: 4px solid #000000;
+            border-radius: 20px;
+            box-shadow: 0 8px 0px #000000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-img {
+            max-width: 120px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(2px 2px 0px #000);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            background: #f8f9fa;
+            color: #000;
+        }
+
+        .btn-sm:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .btn-studio { background: #55ff55; }
+        .btn-profile { background: #48cae4; }
+
+        .search-box {
+            display: flex;
+            gap: 6px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .btn-search {
+            padding: 10px 14px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            background: #ffb703;
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        /* Fully square grid layout with slightly rounded edges */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .game-card-square {
+            aspect-ratio: 1 / 1;
+            background: #f8f9fa;
+            border: 2px solid #000;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0px #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+            text-decoration: none;
+            color: #000;
+            transition: transform 0.1s ease;
+        }
+
+        .game-card-square:hover {
+            transform: translate(-1px, -1px);
+            background: #fff;
+        }
+
+        .game-card-top {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .game-card-title {
+            font-weight: 800;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .game-card-author {
+            font-size: 10px;
+            font-weight: 700;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .game-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .visits-count {
+            color: #333;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .play-tag {
+            background: #55ff55;
+            border: 1.5px solid #000;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .loading-text {
+            grid-column: span 2;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body onload="initHome()">
+
+    <div class="clouds-bg"></div>
+
+    <div class="main-container">
+        <div class="nav-row">
+            <img src="Devworldlogobeta.png" alt="Dev World" class="logo-img">
+            <div class="nav-buttons">
+                <a href="editor.html" class="btn-sm btn-studio">Studio</a>
+                <a href="profile.html" class="btn-sm btn-profile">Profile</a>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="search-username-input" class="input-field" placeholder="Search username...">
+            <button class="btn-search" onclick="searchUser()">Find</button>
+        </div>
+
+        <h3 class="section-title">Games</h3>
+        
+        <div class="games-grid" id="games-container">
+            <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+
+        // Local cache for user profiles to avoid repetitive user document lookups
+        const userCache = {};
+
+        async function getCreatorUsername(authorId) {
+            if (!authorId) return "Unknown";
+            if (userCache[authorId]) return userCache[authorId];
+
+            try {
+                // Try looking up doc by document ID (if authorId equals user UID)
+                let userDoc = await db.collection("users").doc(authorId).get();
+                if (userDoc.exists) {
+                    let uData = userDoc.data();
+                    let name = uData.Username || uData.username || "Unknown";
+                    userCache[authorId] = name;
+                    return name;
+                }
+
+                // Fallback query matching fields if authorId was stored differently
+                let qSnap = await db.collection("users").where("uid", "==", authorId).get();
+                if (!qSnap.empty) {
+                    let uData = qSnap.docs[0].data();
+                    let name = uData.Username || uData.username || "Unknown";
+                    userCache[authorId] = name;
+                    return name;
+                }
+            } catch (err) {
+                console.error("Error fetching creator name:", err);
+            }
+            return "Developer";
+        }
+
+        async function searchUser() {
+            const queryName = document.getElementById('search-username-input').value.trim();
+            if (!queryName) {
+                alert("Please enter a username.");
+                return;
+            }
+
+            try {
+                const querySnapshot = await db.collection("users").where("Username", "==", queryName).get();
+                if (!querySnapshot.empty) {
+                    window.location.href = `userprofile.html?id=${querySnapshot.docs[0].id}`;
+                    return;
+                }
+
+                const querySnapshotLower = await db.collection("users").where("username", "==", queryName).get();
+                if (!querySnapshotLower.empty) {
+                    window.location.href = `userprofile.html?id=${querySnapshotLower.docs[0].id}`;
+                    return;
+                }
+
+                alert("User not found!");
+            } catch (error) {
+                console.error("Error searching user:", error);
+                alert("Lookup failed.");
+            }
+        }
+
+        async function initHome() {
+            const container = document.getElementById('games-container');
+            try {
+                const snapshot = await db.collection("games").orderBy("createdAt", "desc").limit(20).get();
+                container.innerHTML = '';
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="loading-text">No games published yet.</div>';
+                    return;
+                }
+
+                // Render game cards dynamically
+                for (let doc of snapshot.docs) {
+                    const game = doc.data();
+                    const gameId = doc.id;
+                    const publisherId = game.authorId || game.creatorId;
+
+                    // Fetch creator name from users collection asynchronously
+                    const creatorName = await getCreatorUsername(publisherId);
+
+                    const card = document.createElement('a');
+                    card.className = 'game-card-square';
+                    card.href = `play.html?id=${gameId}`;
+
+                    const topDiv = document.createElement('div');
+                    topDiv.className = 'game-card-top';
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'game-card-title';
+                    titleDiv.innerText = game.title || "Untitled Level";
+
+                    const authorDiv = document.createElement('div');
+                    authorDiv.className = 'game-card-author';
+                    authorDiv.innerText = `by ${creatorName}`;
+
+                    topDiv.appendChild(titleDiv);
+                    topDiv.appendChild(authorDiv);
+
+                    const footerDiv = document.createElement('div');
+                    footerDiv.className = 'game-card-footer';
+                    
+                    const visitsSpan = document.createElement('span');
+                    visitsSpan.className = 'visits-count';
+                    visitsSpan.innerText = `👁️ ${game.visits || 0}`;
+
+                    const playSpan = document.createElement('span');
+                    playSpan.className = 'play-tag';
+                    playSpan.innerText = 'Play ▶';
+
+                    footerDiv.appendChild(visitsSpan);
+                    footerDiv.appendChild(playSpan);
+
+                    card.appendChild(topDiv);
+                    card.appendChild(footerDiv);
+                    container.appendChild(card);
+                }
+            } catch (error) {
+                console.error("Error loading games feed:", error);
+                container.innerHTML = '<div class="loading-text" style="color:red;">Failed to load games.</div>';
+            }
+        }
+    </script>
+</body>
+</html>
+
