@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev World - Play</title>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body {
+            background: #111;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .game-wrapper {
+            position: relative;
+            border: 4px solid #000;
+            border-radius: 12px;
+            box-shadow: 0 8px 0px #87CEEB;
+            overflow: hidden;
+            background: #87CEEB;
+            width: 380px;
+            height: 380px;
+            max-width: 100%;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 1px 1px 0px #000;
+            z-index: 10;
+        }
+
+        .btn-exit {
+            background: #ff595e;
+            color: white;
+            border: 2px solid #000;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            text-decoration: none;
+            pointer-events: auto;
+        }
+
+        .btn-exit:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        /* On-Screen Mobile Controls */
+        .mobile-controls {
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding: 0 10px;
+        }
+
+        .d-pad {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ctrl-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 0 4px 0px #000;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .ctrl-btn:active, .ctrl-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #000;
+        }
+
+        .jump-btn {
+            width: 75px;
+            height: 75px;
+            background: #ffb703;
+            border: 3px solid #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 0 5px 0px #000;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .jump-btn:active, .jump-btn.active {
+            background: #ffd166;
+            transform: translateY(3px);
+            box-shadow: 0 2px 0px #000;
+        }
+    </style>
+</head>
+<body onload="initGamePlayer()">
+
+    <div class="game-wrapper" id="game-wrapper">
+        <div class="hud">
+            <span id="level-title-display">Loading Level...</span>
+            <a href="home.html" class="btn-exit">Exit</a>
+        </div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <div class="mobile-controls">
+        <div class="d-pad">
+            <div class="ctrl-btn" id="btn-left">◀</div>
+            <div class="ctrl-btn" id="btn-right">▶</div>
+        </div>
+        <div class="jump-btn" id="btn-jump">JUMP</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.firestore();
+
+        const tileImages = {
+            grass: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled342_20260812162232.png?raw=true",
+            dirt: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled343_20260812162324.png?raw=true",
+            brick: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled341_20260812162119.png?raw=true",
+            player: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled340_20260812161929.png?raw=true"
+        };
+
+        const loadedImages = {};
+        for (let key in tileImages) {
+            let img = new Image();
+            img.src = tileImages[key];
+            loadedImages[key] = img;
+        }
+
+        let levelData = null;
+        let player = { x: 50, y: 50, w: 20, h: 20, vx: 0, vy: 0, speed: 3, jump: -8, grounded: false };
+        let keys = {};
+
+        function setupMobileControls() {
+            const bindTouch = (elemId, keyCode) => {
+                const el = document.getElementById(elemId);
+                if (!el) return;
+
+                el.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    keys[keyCode] = true;
+                    el.classList.add('active');
+                }, { passive: false });
+
+                el.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    keys[keyCode] = false;
+                    el.classList.remove('active');
+                }, { passive: false });
+
+                // Mouse fallback support for desktop testing
+                el.addEventListener('mousedown', (e) => {
+                    keys[keyCode] = true;
+                    el.classList.add('active');
+                });
+                el.addEventListener('mouseup', (e) => {
+                    keys[keyCode] = false;
+                    el.classList.remove('active');
+                });
+            };
+
+            bindTouch('btn-left', 'ArrowLeft');
+            bindTouch('btn-right', 'ArrowRight');
+            bindTouch('btn-jump', 'Space');
+        }
+
+        async function initGamePlayer() {
+            setupMobileControls();
+
+            const params = new URLSearchParams(window.location.search);
+            const mode = params.get('mode');
+            const gameId = params.get('id');
+
+            if (mode === 'test') {
+                const temp = sessionStorage.getItem('tempLevelGrid');
+                if (temp) {
+                    levelData = JSON.parse(temp);
+                    document.getElementById('level-title-display').innerText = "🧪 TEST MODE";
+                    setupLevel();
+                } else {
+                    alert("No test level data found.");
+                    window.location.href = 'studio.html';
+                }
+            } else if (gameId) {
+                try {
+                    const docRef = db.collection("games").doc(gameId);
+                    const doc = await docRef.get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('level-title-display').innerText = data.title || "Community Level";
+                        levelData = {
+                            cols: data.cols || 16,
+                            rows: data.rows || 16,
+                            bgColor: data.bgColor || "#87CEEB",
+                            content: data.content
+                        };
+
+                        firebase.auth().onAuthStateChanged(async (user) => {
+                            const isCreator = user && (user.uid === data.authorId || user.uid === data.creatorId);
+                            if (!isCreator) {
+                                try {
+                                    await docRef.update({
+                                        visits: firebase.firestore.FieldValue.increment(1)
+                                    });
+                                } catch (e) {
+                                    console.log("Visit counter restricted", e);
+                                }
+                            }
+                        });
+
+                        setupLevel();
+                    } else {
+                        alert("Level does not exist.");
+                        window.location.href = 'home.html';
+                    }
+                } catch (err) {
+                    console.error("Error loading level:", err);
+                }
+            } else {
+                alert("No level selected.");
+                window.location.href = 'home.html';
+            }
+        }
+
+        function setupLevel() {
+            document.getElementById('game-wrapper').style.backgroundColor = levelData.bgColor || "#87CEEB";
+            
+            if (levelData.content.playerStart) {
+                let boxSize = 400;
+                let tileSize = boxSize / levelData.cols;
+                player.x = levelData.content.playerStart.x * tileSize;
+                player.y = levelData.content.playerStart.y * tileSize;
+            }
+
+            window.addEventListener('keydown', e => {
+                if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+                keys[e.code] = true;
+            });
+            window.addEventListener('keyup', e => keys[e.code] = false);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop() {
+            updatePhysics();
+            renderGame();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updatePhysics() {
+            let boxSize = 400;
+            let tileSize = boxSize / levelData.cols;
+
+            player.vx = 0;
+            if (keys['ArrowLeft'] || keys['KeyA']) player.vx = -player.speed;
+            if (keys['ArrowRight'] || keys['KeyD']) player.vx = player.speed;
+
+            player.x += player.vx;
+
+            if (player.x < 0) player.x = 0;
+            if (player.x > boxSize - player.w) player.x = boxSize - player.w;
+
+            levelData.content.blocks.forEach(b => {
+                if (b.type !== 'spike') {
+                    let bx = b.x * tileSize;
+                    let by = b.y * tileSize;
+                    if (isColliding(player.x, player.y, player.w, player.h, bx, by, tileSize, tileSize)) {
+                        if (player.vx > 0) player.x = bx - player.w;
+                        if (player.vx < 0) player.x = bx + tileSize;
+                    }
+                }
+            });
+
+            player.vy += 0.4;
+            player.y += player.vy;
+
+            player.grounded = false;
+            levelData.content.blocks.forEach(b => {
+                let bx = b.x * tileSize;
+                let by = b.y * tileSize;
+
+                if (b.type === 'spike') {
+                    if (isColliding(player.x, player.y, player.w, player.h, bx + 2, by + 2, tileSize - 4, tileSize - 4)) {
+                        resetPlayerPosition();
+                    }
+                } else {
+                    if (isColliding(player.x, player.y, player.w, player.h, bx, by, tileSize, tileSize)) {
+                        if (player.vy > 0) {
+                            player.y = by - player.h;
+                            player.vy = 0;
+                            player.grounded = true;
+                        } else if (player.vy < 0) {
+                            player.y = by + tileSize;
+                            player.vy = 0;
+                        }
+                    }
+                }
+            });
+
+            if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && player.grounded) {
+                player.vy = player.jump;
+                player.grounded = false;
+            }
+
+            if (player.y > boxSize) {
+                resetPlayerPosition();
+            }
+        }
+
+        function resetPlayerPosition() {
+            if (levelData.content.playerStart) {
+                let boxSize = 400;
+                let tileSize = boxSize / levelData.cols;
+                player.x = levelData.content.playerStart.x * tileSize;
+                player.y = levelData.content.playerStart.y * tileSize;
+                player.vy = 0;
+            }
+        }
+
+        function isColliding(x1, y1, w1, h1, x2, y2, w2, h2) {
+            return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+        }
+
+        function renderGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            let boxSize = 400;
+            let tileSize = boxSize / levelData.cols;
+
+            ctx.clearRect(0, 0, boxSize, boxSize);
+
+            levelData.content.blocks.forEach(b => {
+                let bx = b.x * tileSize;
+                let by = b.y * tileSize;
+
+                if (b.type === 'spike') {
+                    ctx.font = `${Math.floor(tileSize * 0.8)}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('⚠️', bx + tileSize / 2, by + tileSize / 2);
+                } else if (loadedImages[b.type] && loadedImages[b.type].complete) {
+                    ctx.drawImage(loadedImages[b.type], bx, by, tileSize, tileSize);
+                }
+            });
+
+            if (loadedImages.player && loadedImages.player.complete) {
+                ctx.drawImage(loadedImages.player, player.x, player.y, player.w, player.h);
+            } else {
+                ctx.fillStyle = '#ff595e';
+                ctx.fillRect(player.x, player.y, player.w, player.h);
+            }
+        }
+    </script>
+</body>
+</html>
+
