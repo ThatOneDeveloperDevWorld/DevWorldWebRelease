@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creators - dev world search</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #5ce1e6;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #212529;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .clouds-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border: 4px solid #000000;
+            border-radius: 20px;
+            box-shadow: 0 8px 0px #000000;
+            padding: 25px 20px;
+            text-align: left;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-img {
+            max-width: 140px;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto 10px auto;
+            filter: drop-shadow(3px 3px 0px #000);
+        }
+
+        .header-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 900;
+            margin: 0 0 5px 0;
+        }
+
+        .uid-badge {
+            text-align: center;
+            font-size: 11px;
+            font-family: monospace;
+            background: #e9ecef;
+            border: 1px dashed #000;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+
+        .label-title {
+            font-size: 11px;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .info-box {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #f8f9fa;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            min-height: 40px;
+            word-break: break-word;
+        }
+
+        .section-header {
+            font-size: 13px;
+            font-weight: 900;
+            margin: 5px 0 8px 0;
+            text-transform: uppercase;
+        }
+
+        .games-container {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding-right: 4px;
+        }
+
+        .game-item-card {
+            background: #fdfdfd;
+            border: 2px solid #000;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 2px 2px 0px #000;
+            transition: transform 0.1s ease;
+        }
+
+        .game-item-card:hover {
+            background: #f1f5f9;
+            transform: translate(-1px, -1px);
+        }
+
+        .btn-custom {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            transition: transform 0.1s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            background: #ff595e;
+            color: #fff;
+        }
+
+        .btn-custom:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+    </style>
+</head>
+<body onload="loadUserProfile()">
+
+    <div class="clouds-bg"></div>
+
+    <div class="main-container">
+        <img src="Devworldlogobeta.png" alt="Dev World Logo" class="logo-img">
+        
+        <h3 id="profile-username" class="header-title">Loading User...</h3>
+        <div id="uid-display" class="uid-badge">ID: Loading...</div>
+        
+        <label class="label-title">BIO</label>
+        <div id="profile-bio" class="info-box">Loading bio...</div>
+        
+        <div class="section-header">Published Games</div>
+        <div class="games-container" id="user-games-list">
+            <div style="font-size: 12px; color: #666; text-align: center; padding: 10px;">Loading games...</div>
+        </div>
+
+        <a href="home.html" class="btn-custom">Back</a>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+
+        async function loadUserProfile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let targetIdentifier = urlParams.get('id');
+
+            if (!targetIdentifier) {
+                document.getElementById("profile-username").innerText = "User Not Found";
+                document.getElementById("uid-display").innerText = "No ID specified in query.";
+                document.getElementById("profile-bio").innerText = "Please provide a valid user link.";
+                document.getElementById("user-games-list").innerHTML = "";
+                return;
+            }
+
+            try {
+                let userDoc = null;
+                let userId = "";
+
+                // First, try checking if the parameter is a direct Document ID
+                const directDoc = await db.collection("users").doc(targetIdentifier).get();
+                if (directDoc.exists) {
+                    userDoc = directDoc;
+                    userId = directDoc.id;
+                } else {
+                    // If not a document ID, search fields for the username
+                    let querySnap = await db.collection("users").where("Username", "==", targetIdentifier).get();
+                    if (querySnap.empty) {
+                        querySnap = await db.collection("users").where("username", "==", targetIdentifier).get();
+                    }
+
+                    if (!querySnap.empty) {
+                        userDoc = querySnap.docs[0];
+                        userId = userDoc.id;
+                    }
+                }
+
+                if (!userDoc || !userDoc.exists) {
+                    document.getElementById("profile-username").innerText = "Unknown Creator";
+                    document.getElementById("uid-display").innerText = "ID: " + targetIdentifier;
+                    document.getElementById("profile-bio").innerText = "This user profile does not exist.";
+                    document.getElementById("user-games-list").innerHTML = "";
+                    return;
+                }
+
+                const data = userDoc.data();
+                const username = data.Username || data.username || "DevWorldUser";
+                document.getElementById("profile-username").innerText = username;
+                document.getElementById("uid-display").innerText = "ID: " + userId;
+                document.getElementById("profile-bio").innerText = data.Bio || data.bio || "No bio added yet.";
+
+                const gamesListEl = document.getElementById("user-games-list");
+                gamesListEl.innerHTML = "";
+
+                // Fetch games matching this user ID across possible schema keys
+                const allGamesSnapshot = await db.collection("games").get();
+                let matchedGames = [];
+
+                allGamesSnapshot.forEach(doc => {
+                    const game = doc.data();
+                    const gameAuthorId = game.authorId || game.creatorId || game.userId;
+                    
+                    if (gameAuthorId === userId) {
+                        matchedGames.push({ id: doc.id, ...game });
+                    }
+                });
+
+                if (matchedGames.length === 0) {
+                    gamesListEl.innerHTML = '<div style="font-size: 12px; color: #666; text-align: center; padding: 10px;">No games published yet.</div>';
+                    return;
+                }
+
+                matchedGames.forEach(game => {
+                    const card = document.createElement('a');
+                    card.className = 'game-item-card';
+                    card.href = `play.html?id=${game.id}`;
+                    
+                    const titleSpan = document.createElement('span');
+                    titleSpan.innerText = game.title || "Untitled Level";
+
+                    const badgeSpan = document.createElement('span');
+                    badgeSpan.style.fontSize = '10px';
+                    badgeSpan.style.background = '#e9ecef';
+                    badgeSpan.style.padding = '2px 6px';
+                    badgeSpan.style.borderRadius = '4px';
+                    badgeSpan.innerText = 'Play ▶';
+
+                    card.appendChild(titleSpan);
+                    card.appendChild(badgeSpan);
+                    gamesListEl.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Error loading user profile:", error);
+                document.getElementById("profile-username").innerText = "Error";
+                document.getElementById("profile-bio").innerText = "Could not fetch user record.";
+                document.getElementById("user-games-list").innerHTML = '<div style="font-size: 12px; color: red; text-align: center; padding: 10px;">Failed to retrieve records.</div>';
+            }
+        }
+    </script>
+</body>
+</html>
+
