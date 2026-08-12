@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev World v0.1.0</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #5ce1e6;
+            background-image: url('');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #212529;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .clouds-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height:200%;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            border: 4px solid #000000;
+            border-radius: 20px;
+            box-shadow: 0 8px 0px #000000;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .logo-img {
+            max-width: 220px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 5px;
+            filter: drop-shadow(3px 3px 0px #000);
+        }
+
+        .version-text {
+            font-size: 13px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #f8f9fa;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn-custom {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            transition: transform 0.1s ease;
+            margin-bottom: 12px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-custom:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .btn-start { background: #38b000; color: #fff; }
+
+        .character-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .char-img {
+            width: 90px;
+            height: auto;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="clouds-bg"></div>
+
+    <div class="main-container">
+        <img src="Devworldlogobeta.png" alt="Dev World Logo" class="logo-img">
+        <div class="version-text">v0.1.0</div>
+
+        <div id="auth-section">
+            <input type="email" id="email-input" class="input-field" placeholder="Email address">
+            <input type="password" id="pass-input" class="input-field" placeholder="Password">
+            <button id="login-btn" class="btn-custom btn-start">Start!</button>
+        </div>
+    </div>
+
+    <div class="character-footer">
+        <img src="Devworldchar1green.png" alt="Character" class="char-img" onerror="this.style.display='none'">
+        <img src="Devworldchar1green.png" alt="Character" class="char-img" style="transform: scaleX(-1);" onerror="this.style.display='none'">
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                window.location.href = "profile.html";
+            }
+        });
+
+        document.getElementById("login-btn").addEventListener("click", () => {
+            const email = document.getElementById("email-input").value;
+            const pass = document.getElementById("pass-input").value;
+
+            if (!email || !pass) {
+                alert("Please enter both email and password.");
+                return;
+            }
+
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+            .then(() => {
+                window.location.href = "profile.html";
+            })
+            .catch(() => {
+                return firebase.auth().createUserWithEmailAndPassword(email, pass);
+            })
+            .then((userCredential) => {
+                if (userCredential && userCredential.user) {
+                    const user = userCredential.user;
+                    return db.collection("users").doc(user.uid).set({
+                        Username: "DevWorldUser",
+                        Bio: "nothing... :/",
+                        Projects: []
+                    }, { merge: true }).then(() => {
+                        window.location.href = "profile.html";
+                    });
+                }
+            })
+            .catch((error) => {
+                alert("Error: " + error.message);
+            });
+        });
+    </script>
+</body>
+  </html>
