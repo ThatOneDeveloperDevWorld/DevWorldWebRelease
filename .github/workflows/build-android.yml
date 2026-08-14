@@ -33,8 +33,8 @@ jobs:
           # Initialize config non-interactively
           npx cap init "Dev World" com.devworld.app --web-dir www
           
-          # Force create the android directory directly using npx
-          npx cap add android --force
+          # Add the android directory and sync web files
+          npx cap add android
           npx cap sync
 
       - name: Build Android App (Gradle)
