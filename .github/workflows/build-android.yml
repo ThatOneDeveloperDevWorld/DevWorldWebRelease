@@ -38,6 +38,20 @@ jobs:
           npx cap add android
           npx cap sync
 
+      - name: Fix Kotlin Version Conflicts
+        run: |
+          # Appends a resolution strategy to force matching Kotlin versions in Gradle
+          echo "" >> android/build.gradle
+          echo "subprojects {" >> android/build.gradle
+          echo "    configurations.all {" >> android/build.gradle
+          echo "        resolutionStrategy.eachDependency { details ->" >> android/build.gradle
+          echo "            if (details.requested.group == 'org.jetbrains.kotlin') {" >> android/build.gradle
+          echo "                details.useVersion '1.9.0'" >> android/build.gradle
+          echo "            }" >> android/build.gradle
+          echo "        }" >> android/build.gradle
+          echo "    }" >> android/build.gradle
+          echo "}" >> android/build.gradle
+
       - name: Build Android App (Gradle)
         run: |
           cd android
