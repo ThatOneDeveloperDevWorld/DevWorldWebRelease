@@ -1,0 +1,50 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies & Capacitor
+        run: |
+          npm install
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Organize Web Files for Capacitor
+        run: |
+          # Create a 'www' folder if you don't have one
+          mkdir -p www
+          
+          # Move your HTML, CSS, and JS files into the 'www' folder 
+          # (Skip hidden folders like .git and .github, and the android folder)
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'android' ! -name 'www' -exec mv -t www/ {} +
+
+      - name: Initialize Capacitor Config
+        run: |
+          npx cap init "Dev World" com.devworld.app --web-dir www --yes
+          npx cap add android
+          npx cap sync
+
+      - name: Build Android App (Gradle)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          
