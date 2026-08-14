@@ -16,19 +16,14 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Dependencies & Capacitor
+      - name: Install Capacitor Core and CLI
         run: |
-          npm install
           npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Organize Web Files for Capacitor
         run: |
-          # Create a 'www' folder if you don't have one
           mkdir -p www
-          
-          # Move your HTML, CSS, and JS files into the 'www' folder 
-          # (Skip hidden folders like .git and .github, and the android folder)
-          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'android' ! -name 'www' -exec mv -t www/ {} +
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'android' ! -name 'www' ! -name 'package.json' ! -name 'package-lock.json' -exec mv -t www/ {} +
 
       - name: Initialize Capacitor Config
         run: |
@@ -45,6 +40,6 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: devworld-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           
