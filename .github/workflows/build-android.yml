@@ -16,24 +16,26 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Dependencies & Capacitor Packages
+      - name: Install Dependencies
         run: |
           npm install
-          npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Organize Web Files for Capacitor
         run: |
           mkdir -p www
           find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'android' ! -name 'www' ! -name 'package.json' ! -name 'package-lock.json' -exec mv -t www/ {} +
 
-      - name: Initialize Capacitor Config
+      - name: Initialize Capacitor and Add Android
         run: |
-          npx --yes @capacitor/cli init "Dev World" com.devworld.app --web-dir www
-
-      - name: Add Android Platform
-        run: |
-          npx --yes @capacitor/cli add android
-          npx --yes @capacitor/cli sync
+          # Install CLI, Core, and Android locally in one go
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          
+          # Initialize config non-interactively
+          npx cap init "Dev World" com.devworld.app --web-dir www
+          
+          # Force create the android directory directly using npx
+          npx cap add android --force
+          npx cap sync
 
       - name: Build Android App (Gradle)
         run: |
