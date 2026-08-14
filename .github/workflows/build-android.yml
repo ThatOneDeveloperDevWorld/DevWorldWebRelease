@@ -27,7 +27,7 @@ jobs:
 
       - name: Initialize Capacitor Config
         run: |
-          npx --yes @capacitor/cli init "Dev World" com.devworld.app --web-dir www --yes
+          npx --yes @capacitor/cli init "Dev World" com.devworld.app --web-dir www
           npx --yes @capacitor/cli add android
           npx --yes @capacitor/cli sync
 
