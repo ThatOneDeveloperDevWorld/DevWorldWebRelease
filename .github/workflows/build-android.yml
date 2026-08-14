@@ -16,8 +16,9 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Capacitor Core and CLI
+      - name: Install Dependencies & Capacitor Packages
         run: |
+          npm install
           npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Organize Web Files for Capacitor
