@@ -6,6 +6,7 @@
     <title>Creators - dev world search</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
@@ -82,8 +83,27 @@
             border: 1px dashed #000;
             padding: 4px 8px;
             border-radius: 6px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             word-break: break-all;
+        }
+
+        .social-stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f8f9fa;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .social-stats span {
+            font-weight: 600;
+            font-size: 11px;
+            color: #555;
         }
 
         .label-title {
@@ -95,39 +115,39 @@
 
         .info-box {
             width: 100%;
-            padding: 10px 12px;
+            padding: 8px 12px;
             border: 2px solid #000;
             border-radius: 8px;
             background: #f8f9fa;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-weight: 600;
-            font-size: 14px;
-            min-height: 40px;
+            font-size: 13px;
+            min-height: 35px;
             word-break: break-word;
         }
 
         .section-header {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 900;
-            margin: 5px 0 8px 0;
+            margin: 2px 0 6px 0;
             text-transform: uppercase;
         }
 
         .games-container {
             flex: 1;
             overflow-y: auto;
-            max-height: 180px;
+            max-height: 120px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 6px;
+            margin-bottom: 10px;
             padding-right: 4px;
         }
 
         .game-item-card {
             background: #fdfdfd;
             border: 2px solid #000;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
@@ -135,7 +155,7 @@
             text-decoration: none;
             color: #000;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             box-shadow: 2px 2px 0px #000;
             transition: transform 0.1s ease;
         }
@@ -147,28 +167,31 @@
 
         .btn-custom {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #000;
             border-radius: 10px;
             font-weight: 800;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             box-shadow: 3px 3px 0px #000;
             transition: transform 0.1s ease;
             text-decoration: none;
             display: block;
             text-align: center;
-            background: #ff595e;
-            color: #fff;
+            margin-bottom: 8px;
         }
 
         .btn-custom:active {
             transform: translate(2px, 2px);
             box-shadow: 1px 1px 0px #000;
         }
+
+        .btn-follow { background: #55ff55; color: #000; }
+        .btn-unfollow { background: #ffbe0b; color: #000; }
+        .btn-back { background: #ff595e; color: #fff; margin-bottom: 0; }
     </style>
 </head>
-<body onload="loadUserProfile()">
+<body onload="initProfile()">
 
     <div class="clouds-bg"></div>
 
@@ -178,15 +201,22 @@
         <h3 id="profile-username" class="header-title">Loading User...</h3>
         <div id="uid-display" class="uid-badge">ID: Loading...</div>
         
+        <div class="social-stats">
+            <div><div id="followers-count">0</div><span>Followers</span></div>
+            <div><div id="following-count">0</div><span>Following</span></div>
+        </div>
+
         <label class="label-title">BIO</label>
         <div id="profile-bio" class="info-box">Loading bio...</div>
         
+        <button id="follow-btn" class="btn-custom btn-follow" onclick="toggleFollow()">Follow</button>
+
         <div class="section-header">Published Games</div>
         <div class="games-container" id="user-games-list">
             <div style="font-size: 12px; color: #666; text-align: center; padding: 10px;">Loading games...</div>
         </div>
 
-        <a href="home.html" class="btn-custom">Back</a>
+        <a href="home.html" class="btn-custom btn-back">Back</a>
     </div>
 
     <script>
@@ -204,8 +234,12 @@
         }
 
         const db = firebase.firestore();
+        let targetUserId = "";
+        let targetUsername = "";
+        let isFollowing = false;
+        let profileUnsubscribe = null;
 
-        async function loadUserProfile() {
+        async function initProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             let targetIdentifier = urlParams.get('id');
 
@@ -218,28 +252,33 @@
             }
 
             try {
-                let userDoc = null;
-                let userId = "";
+                let initialDoc = null;
 
-                // First, try checking if the parameter is a direct Document ID
-                const directDoc = await db.collection("users").doc(targetIdentifier).get();
-                if (directDoc.exists) {
-                    userDoc = directDoc;
-                    userId = directDoc.id;
-                } else {
-                    // If not a document ID, search fields for the username
-                    let querySnap = await db.collection("users").where("Username", "==", targetIdentifier).get();
-                    if (querySnap.empty) {
-                        querySnap = await db.collection("users").where("username", "==", targetIdentifier).get();
+                try {
+                    const directDoc = await db.collection("users").doc(targetIdentifier).get();
+                    if (directDoc.exists) {
+                        initialDoc = directDoc;
+                        targetUserId = directDoc.id;
                     }
-
-                    if (!querySnap.empty) {
-                        userDoc = querySnap.docs[0];
-                        userId = userDoc.id;
-                    }
+                } catch (e) {
+                    console.log("Direct lookup fallback active");
                 }
 
-                if (!userDoc || !userDoc.exists) {
+                if (!initialDoc || !initialDoc.exists) {
+                    const allUsersSnap = await db.collection("users").get();
+                    const targetLower = targetIdentifier.toLowerCase();
+                    
+                    allUsersSnap.forEach(doc => {
+                        const dData = doc.data();
+                        const uName = (dData.Username || dData.username || "").toLowerCase();
+                        if (doc.id === targetIdentifier || uName === targetLower) {
+                            initialDoc = doc;
+                            targetUserId = doc.id;
+                        }
+                    });
+                }
+
+                if (!targetUserId) {
                     document.getElementById("profile-username").innerText = "Unknown Creator";
                     document.getElementById("uid-display").innerText = "ID: " + targetIdentifier;
                     document.getElementById("profile-bio").innerText = "This user profile does not exist.";
@@ -247,24 +286,61 @@
                     return;
                 }
 
-                const data = userDoc.data();
-                const username = data.Username || data.username || "DevWorldUser";
-                document.getElementById("profile-username").innerText = username;
-                document.getElementById("uid-display").innerText = "ID: " + userId;
-                document.getElementById("profile-bio").innerText = data.Bio || data.bio || "No bio added yet.";
+                // Check auth and determine follow status right away
+                firebase.auth().onAuthStateChanged(async (currentUser) => {
+                    if (currentUser) {
+                        if (currentUser.uid === targetUserId) {
+                            document.getElementById("follow-btn").style.display = "none";
+                            return;
+                        }
 
+                        try {
+                            const mySnap = await db.collection("users").doc(currentUser.uid).get();
+                            if (mySnap.exists) {
+                                const myFollowing = Array.isArray(mySnap.data().following) ? mySnap.data().following : [];
+                                if (myFollowing.includes(targetUserId)) {
+                                    isFollowing = true;
+                                    const followBtn = document.getElementById("follow-btn");
+                                    followBtn.innerText = "Followed";
+                                    followBtn.className = "btn-custom btn-unfollow";
+                                }
+                            }
+                        } catch (err) {
+                            console.log("Error checking follow state:", err);
+                        }
+                    }
+                });
+
+                // Real-time listener for target user profile
+                if (profileUnsubscribe) profileUnsubscribe();
+                profileUnsubscribe = db.collection("users").doc(targetUserId).onSnapshot((docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        targetUsername = data.Username || data.username || "DevWorldUser";
+                        
+                        document.getElementById("profile-username").innerText = targetUsername;
+                        document.getElementById("uid-display").innerText = "ID: " + targetUserId;
+                        document.getElementById("profile-bio").innerText = data.Bio || data.bio || "No bio added yet.";
+
+                        const followersList = Array.isArray(data.followers) ? data.followers : (Array.isArray(data.Followers) ? data.Followers : []);
+                        const followingList = Array.isArray(data.following) ? data.following : (Array.isArray(data.Following) ? data.Following : []);
+                        
+                        document.getElementById("followers-count").innerText = followersList.length;
+                        document.getElementById("following-count").innerText = followingList.length;
+                    }
+                });
+
+                // Load user games
                 const gamesListEl = document.getElementById("user-games-list");
                 gamesListEl.innerHTML = "";
 
-                // Fetch games matching this user ID across possible schema keys
                 const allGamesSnapshot = await db.collection("games").get();
                 let matchedGames = [];
 
                 allGamesSnapshot.forEach(doc => {
                     const game = doc.data();
                     const gameAuthorId = game.authorId || game.creatorId || game.userId;
-                    
-                    if (gameAuthorId === userId) {
+                    if (gameAuthorId === targetUserId) {
                         matchedGames.push({ id: doc.id, ...game });
                     }
                 });
@@ -298,10 +374,55 @@
                 console.error("Error loading user profile:", error);
                 document.getElementById("profile-username").innerText = "Error";
                 document.getElementById("profile-bio").innerText = "Could not fetch user record.";
-                document.getElementById("user-games-list").innerHTML = '<div style="font-size: 12px; color: red; text-align: center; padding: 10px;">Failed to retrieve records.</div>';
+            }
+        }
+
+        async function toggleFollow() {
+            const currentUser = firebase.auth().currentUser;
+            
+            if (!currentUser) {
+                alert("please sign into or create an account to follow users.");
+                return;
+            }
+
+            const myRef = db.collection("users").doc(currentUser.uid);
+            const targetRef = db.collection("users").doc(targetUserId);
+            const followBtn = document.getElementById("follow-btn");
+
+            try {
+                const mySnap = await myRef.get();
+                const targetSnap = await targetRef.get();
+
+                let myFollowing = (mySnap.exists && Array.isArray(mySnap.data().following)) ? mySnap.data().following : [];
+                let targetFollowers = (targetSnap.exists && Array.isArray(targetSnap.data().followers)) ? targetSnap.data().followers : [];
+
+                if (isFollowing) {
+                    myFollowing = myFollowing.filter(id => id !== targetUserId);
+                    targetFollowers = targetFollowers.filter(id => id !== currentUser.uid);
+
+                    isFollowing = false;
+                    followBtn.innerText = "Follow";
+                    followBtn.className = "btn-custom btn-follow";
+                } else {
+                    if (!myFollowing.includes(targetUserId)) myFollowing.push(targetUserId);
+                    if (!targetFollowers.includes(currentUser.uid)) targetFollowers.push(currentUser.uid);
+
+                    isFollowing = true;
+                    followBtn.innerText = "Followed";
+                    followBtn.className = "btn-custom btn-unfollow";
+                    
+                    alert(`you have followed ${targetUsername}`);
+                }
+
+                // Explicitly merge data to force creation of the fields if they completely missed them before
+                await myRef.set({ following: myFollowing }, { merge: true });
+                await targetRef.set({ followers: targetFollowers }, { merge: true });
+
+            } catch (err) {
+                console.error("Error updating follow status:", err);
+                alert("Failed to update follow status. Check console for details.");
             }
         }
     </script>
 </body>
 </html>
-
