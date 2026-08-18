@@ -14,7 +14,6 @@
         body {
             background-color: #5ce1e6;
             background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
-            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -81,8 +80,27 @@
             border: 1px dashed #000;
             padding: 4px 8px;
             border-radius: 6px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             word-break: break-all;
+        }
+
+        .social-stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f8f9fa;
+            border: 2px solid #000;
+            border-radius: 10px;
+            padding: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .social-stats span {
+            font-weight: 600;
+            font-size: 12px;
+            color: #555;
         }
 
         .label-title {
@@ -140,6 +158,11 @@
         <h3 id="welcome-user" class="header-title">Loading...</h3>
         <div id="uid-display" class="uid-badge">ID: Loading...</div>
         
+        <div class="social-stats">
+            <div><div id="followers-count">0</div><span>Followers</span></div>
+            <div><div id="following-count">0</div><span>Following</span></div>
+        </div>
+
         <label class="label-title">USERNAME</label>
         <input type="text" id="username-input" class="input-field" placeholder="Username">
         
@@ -171,20 +194,51 @@
             if (user) {
                 document.getElementById("uid-display").innerText = "ID: " + user.uid;
 
-                db.collection("users").doc(user.uid).get().then((doc) => {
+                const userDocRef = db.collection("users").doc(user.uid);
+
+                userDocRef.get().then((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
+                        
+                        // Check and initialize followers/following fields if they don't exist yet
+                        let updateData = {};
+                        let needsUpdate = false;
+
+                        if (!data.followers) {
+                            updateData.followers = [];
+                            needsUpdate = true;
+                        }
+                        if (!data.following) {
+                            updateData.following = [];
+                            needsUpdate = true;
+                        }
+
+                        if (needsUpdate) {
+                            userDocRef.set(updateData, { merge: true });
+                        }
+
+                        // Set values to UI
                         document.getElementById("username-input").value = data.Username || "";
                         document.getElementById("bio-input").value = data.Bio || "";
                         document.getElementById("welcome-user").innerText = data.Username || "Creator Profile";
+                        
+                        // Display counts
+                        document.getElementById("followers-count").innerText = (data.followers || []).length;
+                        document.getElementById("following-count").innerText = (data.following || []).length;
+
                     } else {
-                        db.collection("users").doc(user.uid).set({
+                        // Create brand new doc with everything
+                        userDocRef.set({
                             Username: "DevWorldUser",
                             Bio: "Building awesome games!",
-                            Projects: []
+                            Projects: [],
+                            followers: [],
+                            following: []
                         }, { merge: true });
                         
                         document.getElementById("welcome-user").innerText = "DevWorldUser";
+                        document.getElementById("followers-count").innerText = "0";
+                        document.getElementById("following-count").innerText = "0";
                     }
                 });
             } else {
@@ -223,5 +277,5 @@
         });
     </script>
 </body>
-            </html>
-            
+    </html>
+    
