@@ -76,7 +76,6 @@
             box-shadow: 1px 1px 0px #000;
         }
 
-        /* On-Screen Mobile Controls */
         .mobile-controls {
             width: 100%;
             max-width: 380px;
@@ -174,14 +173,24 @@
             grass: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled342_20260812162232.png?raw=true",
             dirt: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled343_20260812162324.png?raw=true",
             brick: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled341_20260812162119.png?raw=true",
+            sand: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled360_20260820135759.png?raw=true",
             player: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled340_20260812161929.png?raw=true"
+        };
+
+        const tileFallbackColors = {
+            grass: '#4bb543',
+            dirt: '#8b5a2b',
+            brick: '#a52a2a',
+            sand: '#e9c46a'
         };
 
         const loadedImages = {};
         for (let key in tileImages) {
-            let img = new Image();
-            img.src = tileImages[key];
-            loadedImages[key] = img;
+            if (tileImages[key]) {
+                let img = new Image();
+                img.src = tileImages[key];
+                loadedImages[key] = img;
+            }
         }
 
         let levelData = null;
@@ -205,7 +214,6 @@
                     el.classList.remove('active');
                 }, { passive: false });
 
-                // Mouse fallback support for desktop testing
                 el.addEventListener('mousedown', (e) => {
                     keys[keyCode] = true;
                     el.classList.add('active');
@@ -252,6 +260,8 @@
                             content: data.content
                         };
 
+                        const creatorId = data.authorId || data.creatorId;
+
                         firebase.auth().onAuthStateChanged(async (user) => {
                             const isCreator = user && (user.uid === data.authorId || user.uid === data.creatorId);
                             if (!isCreator) {
@@ -259,8 +269,29 @@
                                     await docRef.update({
                                         visits: firebase.firestore.FieldValue.increment(1)
                                     });
+
+                                    if (creatorId) {
+                                        const creatorRef = db.collection("users").doc(creatorId);
+                                        const creatorDoc = await creatorRef.get();
+                                        if (creatorDoc.exists) {
+                                            const cData = creatorDoc.data();
+                                            if (cData.coins !== undefined) {
+                                                await creatorRef.update({
+                                                    coins: firebase.firestore.FieldValue.increment(1)
+                                                });
+                                            } else if (cData.DevCoins !== undefined) {
+                                                await creatorRef.update({
+                                                    DevCoins: firebase.firestore.FieldValue.increment(1)
+                                                });
+                                            } else {
+                                                await creatorRef.set({ coins: 1 }, { merge: true });
+                                            }
+                                        } else {
+                                            await creatorRef.set({ coins: 1 }, { merge: true });
+                                        }
+                                    }
                                 } catch (e) {
-                                    console.log("Visit counter restricted", e);
+                                    console.log("Visit counter or coin update restricted", e);
                                 }
                             }
                         });
@@ -395,12 +426,15 @@
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('⚠️', bx + tileSize / 2, by + tileSize / 2);
-                } else if (loadedImages[b.type] && loadedImages[b.type].complete) {
+                } else if (loadedImages[b.type] && loadedImages[b.type].complete && loadedImages[b.type].naturalWidth !== 0) {
                     ctx.drawImage(loadedImages[b.type], bx, by, tileSize, tileSize);
+                } else {
+                    ctx.fillStyle = tileFallbackColors[b.type] || '#888';
+                    ctx.fillRect(bx, by, tileSize, tileSize);
                 }
             });
 
-            if (loadedImages.player && loadedImages.player.complete) {
+            if (loadedImages.player && loadedImages.player.complete && loadedImages.player.naturalWidth !== 0) {
                 ctx.drawImage(loadedImages.player, player.x, player.y, player.w, player.h);
             } else {
                 ctx.fillStyle = '#ff595e';
@@ -410,4 +444,3 @@
     </script>
 </body>
 </html>
-
