@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dev World - Editor</title>
+    <title>Dev World - Studio</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -13,7 +13,7 @@
         * { box-sizing: border-box; }
         body {
             background-color: #5ce1e6;
-            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-image: url('https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled338_20260812133205.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -36,7 +36,7 @@
             left: 0;
             width: 200%;
             height: 200%;
-            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-image: url('https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled338_20260812133205.png');
             background-repeat: repeat-x;
             background-size: contain;
             opacity: 0.8;
@@ -305,12 +305,13 @@
 
         const catalog = {
             tiles: [
-                { id: 'grass', name: 'Grass', img: 'https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled342_20260812162232.png?raw=true' },
-                { id: 'dirt', name: 'Dirt', img: 'https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled343_20260812162324.png?raw=true' },
-                { id: 'brick', name: 'Brick', img: 'https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled341_20260812162119.png?raw=true' }
+                { id: 'grass', name: 'Grass', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled342_20260812162232.png' },
+                { id: 'dirt', name: 'Dirt', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled343_20260812162324.png' },
+                { id: 'brick', name: 'Brick', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled341_20260812162119.png' },
+                { id: 'sand', name: 'Sand', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled360_20260820135759.png' }
             ],
             decor: [
-                { id: 'player', name: 'Player Spawn', img: 'https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled340_20260812161929.png?raw=true' }
+                { id: 'player', name: 'Player Spawn', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled340_20260812161929.png' }
             ],
             traps: [
                 { id: 'spike', name: 'Spike', emoji: '⚠️' }
@@ -424,7 +425,7 @@
                 }
 
                 if (levelData.playerStart && levelData.playerStart.x === x && levelData.playerStart.y === y) {
-                    cell.style.backgroundImage = `url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled340_20260812161929.png?raw=true')`;
+                    cell.style.backgroundImage = `url('https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled340_20260812161929.png')`;
                 }
             }
         }
@@ -446,11 +447,9 @@
                     cell.style.width = `${cellSize}px`;
                     cell.style.height = `${cellSize}px`;
 
-                    // Drag-to-place event listeners
                     cell.addEventListener('mousedown', (e) => { e.preventDefault(); isDrawing = true; applyCellAction(x, y); });
                     cell.addEventListener('mouseover', () => { if (isDrawing) applyCellAction(x, y); });
                     
-                    // Mobile touch support
                     cell.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; applyCellAction(x, y); }, { passive: false });
                     cell.addEventListener('touchmove', (e) => {
                         e.preventDefault();
@@ -502,7 +501,7 @@
                 cols: currentSize,
                 rows: currentSize,
                 bgColor: document.getElementById('bg-color').value,
-                visits: 0, // Initialize visit counter
+                visits: 0,
                 content: levelData,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
@@ -510,7 +509,7 @@
             try {
                 showToast("Publishing level...");
                 await db.collection("games").add(gamePayload);
-                showToast("Published successfully!");
+                showToast("🚀 Published successfully!");
                 setTimeout(() => window.location.href = 'home.html', 1500);
             } catch (err) {
                 alert("Publish failed: " + err.message);
@@ -518,5 +517,5 @@
         }
     </script>
 </body>
-  </html>
-  
+    </html>
+    
