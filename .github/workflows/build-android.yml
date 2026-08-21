@@ -64,9 +64,27 @@ jobs:
                   resized = img.resize((size, size), Image.Resampling.LANCZOS)
                   resized.save(os.path.join(res_dir, 'ic_launcher.png'), 'PNG')
                   resized.save(os.path.join(res_dir, 'ic_launcher_round.png'), 'PNG')
-              print('Successfully generated and applied custom app icons!')
+
+              # Create adaptive icon XML configuration for modern Android versions
+              anydpi_dir = os.path.join(base_dir, 'mipmap-anydpi-v26')
+              os.makedirs(anydpi_dir, exist_ok=True)
+              
+              xml_content = '''<?xml version=\"1.0\" encoding=\"utf-8\"?>
+              <adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">
+                  <background android:drawable=\"@mipmap/ic_launcher_background\"/>
+                  <foreground android:drawable=\"@mipmap/ic_launcher_foreground\"/>
+              </adaptive-icon>'''
+              
+              fg_dir = os.path.join(base_dir, 'mipmap-xxxhdpi')
+              img.resize((108, 108), Image.Resampling.LANCZOS).save(os.path.join(fg_dir, 'ic_launcher_foreground.png'), 'PNG')
+              img.resize((108, 108), Image.Resampling.LANCZOS).save(os.path.join(fg_dir, 'ic_launcher_background.png'), 'PNG')
+
+              with open(os.path.join(anydpi_dir, 'ic_launcher.xml'), 'w') as f:
+                  f.write(xml_content)
+
+              print('Successfully generated adaptive icons and XML configs!')
           else:
-              print('icon.png not found, skipping custom icon generation.')
+              print('icon.png not found.')
           "
 
       - name: Sync Capacitor
