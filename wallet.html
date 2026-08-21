@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev World - Wallet</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            background-color: #5ce1e6;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #212529;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 15px;
+            padding-bottom: 90px;
+        }
+
+        .clouds-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .fullscreen-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 14px;
+            box-shadow: 0 5px 0px #000000;
+            padding: 12px 18px;
+        }
+
+        .logo-img {
+            max-width: 120px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(2px 2px 0px #000);
+        }
+
+        .wallet-card {
+            background: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 14px;
+            box-shadow: 0 5px 0px #000000;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .wallet-title {
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .coin-display {
+            background: #ffb703;
+            border: 3px solid #000;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 28px;
+            font-weight: 900;
+            box-shadow: 3px 3px 0px #000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-info {
+            font-size: 13px;
+            font-weight: 700;
+            color: #555;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Fixed Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
+            box-shadow: 0 -4px 0px #000000;
+            border-top: 3px solid #000000;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            background: #f8f9fa;
+            border: 2px solid #000;
+            border-radius: 8px;
+            color: #000;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 16px;
+            box-shadow: 2px 2px 0px #000;
+            text-decoration: none;
+            transition: transform 0.1s ease;
+        }
+
+        .nav-item:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .nav-home { background: #ff70a6; }
+        .nav-create { background: #55ff55; }
+        .nav-profile { background: #48cae4; }
+
+        /* Popup Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border: 3px solid #000;
+            border-radius: 14px;
+            box-shadow: 5px 5px 0px #000;
+            width: 100%;
+            max-width: 360px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .modal-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            transition: transform 0.1s ease;
+        }
+
+        .modal-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .btn-cancel { background: #ff6b6b; color: #fff; }
+        .btn-confirm { background: #55ff55; color: #000; }
+    </style>
+</head>
+<body onload="initWallet()">
+
+    <div class="clouds-bg"></div>
+
+    <div class="fullscreen-container">
+        <div class="nav-row">
+            <img src="Devworldlogobeta.png" alt="Dev World" class="logo-img">
+        </div>
+
+        <div class="wallet-card">
+            <h2 class="wallet-title">Your Dev Coins</h2>
+            <div class="coin-display" id="coin-balance">
+                🪙 Loading...
+            </div>
+            <p class="wallet-info">Earn Dev Coins when players visit and play the games you create!</p>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar with Home, Create (in middle), and Profile -->
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item nav-home">
+            <span>🏠</span>
+            Home
+        </a>
+        <button type="button" class="nav-item nav-create" onclick="openCreateModal()">
+            <span>✏️</span>
+            Create
+        </button>
+        <a href="profile.html" class="nav-item nav-profile">
+            <span>👤</span>
+            Profile
+        </a>
+    </nav>
+
+    <!-- Create Confirmation Popup Modal -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-box">
+            <h3 class="modal-title">Create Game</h3>
+            <p class="modal-text">Create a new game? Once published, this game will be public to everyone on Dev world.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" onclick="closeCreateModal()">Cancel</button>
+                <button class="modal-btn btn-confirm" onclick="confirmCreate()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        async function initWallet() {
+            const coinDisplay = document.getElementById('coin-balance');
+
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    coinDisplay.innerText = "🪙 0";
+                    return;
+                }
+
+                try {
+                    // Fetch user document to read dev coins or calculate based on game visits
+                    const userDoc = await db.collection("users").doc(user.uid).get();
+                    let coins = 0;
+
+                    if (userDoc.exists && userDoc.data().devCoins !== undefined) {
+                        coins = userDoc.data().devCoins;
+                    } else {
+                        // Fallback: calculate coins based on total visits of games created by this user
+                        const gamesSnap = await db.collection("games").where("authorId", "==", user.uid).get();
+                        gamesSnap.forEach(doc => {
+                            const data = doc.data();
+                            coins += (data.visits || 0);
+                        });
+                    }
+
+                    coinDisplay.innerText = `🪙 ${coins}`;
+                } catch (error) {
+                    console.error("Error fetching wallet data:", error);
+                    coinDisplay.innerText = "🪙 Error";
+                }
+            });
+        }
+
+        function openCreateModal() {
+            document.getElementById('createModal').style.display = 'flex';
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').style.display = 'none';
+        }
+
+        function confirmCreate() {
+            window.location.href = 'editor.html';
+        }
+    </script>
+</body>
+  </html>
+  
