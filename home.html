@@ -11,6 +11,7 @@
 
     <style>
         * { box-sizing: border-box; }
+        
         body {
             background-color: #5ce1e6;
             background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
@@ -22,10 +23,9 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
             min-height: 100vh;
-            padding: 20px;
+            padding: 15px;
+            padding-bottom: 90px;
         }
 
         .clouds-bg {
@@ -42,16 +42,12 @@
             z-index: 1;
         }
 
-        .main-container {
+        .fullscreen-container {
             position: relative;
             z-index: 2;
             width: 100%;
-            max-width: 440px;
-            background: #ffffff;
-            border: 4px solid #000000;
-            border-radius: 20px;
-            box-shadow: 0 8px 0px #000000;
-            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -61,6 +57,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 14px;
+            box-shadow: 0 5px 0px #000000;
+            padding: 12px 18px;
         }
 
         .logo-img {
@@ -70,37 +71,14 @@
             filter: drop-shadow(2px 2px 0px #000);
         }
 
-        .nav-buttons {
-            display: flex;
-            gap: 6px;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            border: 2px solid #000;
-            border-radius: 8px;
-            font-weight: 800;
-            font-size: 12px;
-            cursor: pointer;
-            box-shadow: 2px 2px 0px #000;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            background: #f8f9fa;
-            color: #000;
-        }
-
-        .btn-sm:active {
-            transform: translate(1px, 1px);
-            box-shadow: 1px 1px 0px #000;
-        }
-
-        .btn-studio { background: #55ff55; }
-        .btn-profile { background: #48cae4; }
-
         .search-box {
             display: flex;
-            gap: 6px;
+            gap: 8px;
+            background: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 14px;
+            box-shadow: 0 5px 0px #000000;
+            padding: 12px 18px;
         }
 
         .input-field {
@@ -114,7 +92,7 @@
         }
 
         .btn-search {
-            padding: 10px 14px;
+            padding: 10px 16px;
             border: 2px solid #000;
             border-radius: 8px;
             font-weight: 800;
@@ -125,39 +103,45 @@
         }
 
         .section-title {
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 900;
             text-transform: uppercase;
-            margin: 0;
+            margin: 5px 0 0 0;
+            color: #000;
+            background: #ffffff;
+            border: 3px solid #000;
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 0px #000;
+            align-self: flex-start;
         }
 
-        /* Fully square grid layout with slightly rounded edges */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 12px;
-            max-height: 320px;
-            overflow-y: auto;
-            padding-right: 2px;
+            width: 100%;
         }
 
         .game-card-square {
             aspect-ratio: 1 / 1;
             background: #f8f9fa;
-            border: 2px solid #000;
-            border-radius: 12px;
+            border: 2.5px solid #000;
+            border-radius: 10px;
             box-shadow: 3px 3px 0px #000;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 12px;
+            padding: 10px;
             text-decoration: none;
             color: #000;
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
 
         .game-card-square:hover {
             transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px #000;
             background: #fff;
         }
 
@@ -169,7 +153,7 @@
 
         .game-card-title {
             font-weight: 800;
-            font-size: 14px;
+            font-size: 13px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -178,9 +162,9 @@
         }
 
         .game-card-author {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
-            color: #666;
+            color: #555;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -190,45 +174,160 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
         }
 
         .visits-count {
             color: #333;
             background: #e9ecef;
-            padding: 2px 6px;
+            padding: 2px 5px;
             border-radius: 4px;
-            border: 1px solid #ccc;
+            border: 1px solid #000;
         }
 
         .play-tag {
             background: #55ff55;
             border: 1.5px solid #000;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 1.5px 1.5px 0px #000;
         }
 
         .loading-text {
-            grid-column: span 2;
+            grid-column: 1 / -1;
             text-align: center;
-            font-size: 13px;
-            color: #666;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 3px 3px 0px #000;
+        }
+
+        /* Fixed Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
+            box-shadow: 0 -4px 0px #000000;
+            border-top: 3px solid #000000;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            background: #f8f9fa;
+            border: 2px solid #000;
+            border-radius: 8px;
+            color: #000;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 16px;
+            box-shadow: 2px 2px 0px #000;
+            text-decoration: none;
+            transition: transform 0.1s ease;
+        }
+
+        .nav-item:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .nav-wallet { background: #ffb703; }
+        .nav-create { background: #55ff55; }
+        .nav-profile { background: #48cae4; }
+
+        /* Popup Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
+
+        .modal-box {
+            background: #ffffff;
+            border: 3px solid #000;
+            border-radius: 14px;
+            box-shadow: 5px 5px 0px #000;
+            width: 100%;
+            max-width: 360px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .modal-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            transition: transform 0.1s ease;
+        }
+
+        .modal-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .btn-cancel { background: #ff6b6b; color: #fff; }
+        .btn-confirm { background: #55ff55; color: #000; }
     </style>
 </head>
 <body onload="initHome()">
 
     <div class="clouds-bg"></div>
 
-    <div class="main-container">
+    <div class="fullscreen-container">
         <div class="nav-row">
             <img src="Devworldlogobeta.png" alt="Dev World" class="logo-img">
-            <div class="nav-buttons">
-                <a href="editor.html" class="btn-sm btn-studio">Studio</a>
-                <a href="profile.html" class="btn-sm btn-profile">Profile</a>
-            </div>
         </div>
 
         <div class="search-box">
@@ -236,10 +335,38 @@
             <button class="btn-search" onclick="searchUser()">Find</button>
         </div>
 
-        <h3 class="section-title">Games</h3>
+        <h3 class="section-title">All Games</h3>
         
         <div class="games-grid" id="games-container">
             <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar with Wallet, Create (in middle), and Profile -->
+    <nav class="bottom-nav">
+        <a href="wallet.html" class="nav-item nav-wallet">
+            <span>💰</span>
+            Wallet
+        </a>
+        <button type="button" class="nav-item nav-create" onclick="openCreateModal()">
+            <span>✏️</span>
+            Create
+        </button>
+        <a href="profile.html" class="nav-item nav-profile">
+            <span>👤</span>
+            Profile
+        </a>
+    </nav>
+
+    <!-- Create Confirmation Popup Modal -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-box">
+            <h3 class="modal-title">Create Game</h3>
+            <p class="modal-text">Create a new game? Once published, this game will be public to everyone on Dev world.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" onclick="closeCreateModal()">Cancel</button>
+                <button class="modal-btn btn-confirm" onclick="confirmCreate()">Confirm</button>
+            </div>
         </div>
     </div>
 
@@ -259,7 +386,6 @@
 
         const db = firebase.firestore();
 
-        // Local cache for user profiles to avoid repetitive user document lookups
         const userCache = {};
 
         async function getCreatorUsername(authorId) {
@@ -267,7 +393,6 @@
             if (userCache[authorId]) return userCache[authorId];
 
             try {
-                // Try looking up doc by document ID (if authorId equals user UID)
                 let userDoc = await db.collection("users").doc(authorId).get();
                 if (userDoc.exists) {
                     let uData = userDoc.data();
@@ -276,7 +401,6 @@
                     return name;
                 }
 
-                // Fallback query matching fields if authorId was stored differently
                 let qSnap = await db.collection("users").where("uid", "==", authorId).get();
                 if (!qSnap.empty) {
                     let uData = qSnap.docs[0].data();
@@ -320,7 +444,7 @@
         async function initHome() {
             const container = document.getElementById('games-container');
             try {
-                const snapshot = await db.collection("games").orderBy("createdAt", "desc").limit(20).get();
+                const snapshot = await db.collection("games").orderBy("createdAt", "desc").get();
                 container.innerHTML = '';
 
                 if (snapshot.empty) {
@@ -328,13 +452,11 @@
                     return;
                 }
 
-                // Render game cards dynamically
                 for (let doc of snapshot.docs) {
                     const game = doc.data();
                     const gameId = doc.id;
                     const publisherId = game.authorId || game.creatorId;
 
-                    // Fetch creator name from users collection asynchronously
                     const creatorName = await getCreatorUsername(publisherId);
 
                     const card = document.createElement('a');
@@ -378,7 +500,18 @@
                 container.innerHTML = '<div class="loading-text" style="color:red;">Failed to load games.</div>';
             }
         }
+
+        function openCreateModal() {
+            document.getElementById('createModal').style.display = 'flex';
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').style.display = 'none';
+        }
+
+        function confirmCreate() {
+            window.location.href = 'editor.html';
+        }
     </script>
 </body>
 </html>
-
