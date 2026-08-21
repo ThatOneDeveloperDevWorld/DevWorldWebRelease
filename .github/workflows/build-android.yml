@@ -37,7 +37,7 @@ jobs:
           npx cap init "Dev World" com.devworld.app --web-dir www
           npx cap add android
 
-      - name: Process and Apply App Icon via Python
+      - name: Process and Apply Full App Icon Set via Python
         run: |
           pip install Pillow
           python3 -c "
@@ -57,6 +57,8 @@ jobs:
               }
               
               base_dir = 'android/app/src/main/res'
+              
+              # 1. Generate standard legacy icons
               for folder, size in sizes.items():
                   res_dir = os.path.join(base_dir, folder)
                   os.makedirs(res_dir, exist_ok=True)
@@ -65,7 +67,29 @@ jobs:
                   resized.save(os.path.join(res_dir, 'ic_launcher.png'), 'PNG')
                   resized.save(os.path.join(res_dir, 'ic_launcher_round.png'), 'PNG')
 
-              # Create adaptive icon XML configuration for modern Android versions
+              # 2. Generate adaptive layers (108x108 for xxxhdpi base reference)
+              adaptive_sizes = {
+                  'mipmap-mdpi': 108,
+                  'mipmap-hdpi': 162,
+                  'mipmap-xhdpi': 216,
+                  'mipmap-xxhdpi': 324,
+                  'mipmap-xxxhdpi': 432
+              }
+              
+              for folder, size in adaptive_sizes.items():
+                  res_dir = os.path.join(base_dir, folder)
+                  os.makedirs(res_dir, exist_ok=True)
+                  
+                  # Foreground and background layers for adaptive icons
+                  adaptive_img = img.resize((size, size), Image.Resampling.LANCZOS)
+                  adaptive_img.save(os.path.join(res_dir, 'ic_launcher_foreground.png'), 'PNG')
+                  
+                  # Solid or matching background layer
+                  bg_img = Image.new('RGBA', (size, size), (255, 255, 255, 255))
+                  bg_img.paste(adaptive_img, (0, 0), adaptive_img)
+                  bg_img.save(os.path.join(res_dir, 'ic_launcher_background.png'), 'PNG')
+
+              # 3. Create anydpi-v26 xml definitions
               anydpi_dir = os.path.join(base_dir, 'mipmap-anydpi-v26')
               os.makedirs(anydpi_dir, exist_ok=True)
               
@@ -75,14 +99,12 @@ jobs:
                   <foreground android:drawable=\"@mipmap/ic_launcher_foreground\"/>
               </adaptive-icon>'''
               
-              fg_dir = os.path.join(base_dir, 'mipmap-xxxhdpi')
-              img.resize((108, 108), Image.Resampling.LANCZOS).save(os.path.join(fg_dir, 'ic_launcher_foreground.png'), 'PNG')
-              img.resize((108, 108), Image.Resampling.LANCZOS).save(os.path.join(fg_dir, 'ic_launcher_background.png'), 'PNG')
-
               with open(os.path.join(anydpi_dir, 'ic_launcher.xml'), 'w') as f:
                   f.write(xml_content)
+              with open(os.path.join(anydpi_dir, 'ic_launcher_round.xml'), 'w') as f:
+                  f.write(xml_content)
 
-              print('Successfully generated adaptive icons and XML configs!')
+              print('Successfully generated complete legacy and adaptive icon architecture!')
           else:
               print('icon.png not found.')
           "
