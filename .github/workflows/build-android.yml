@@ -36,6 +36,34 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "Dev World" com.devworld.app --web-dir www
           npx cap add android
+
+      - name: Apply Custom App Icon
+        run: |
+          if [ -f "icon.png" ]; then
+            mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+            mkdir -p android/app/src/main/res/mipmap-xxhdpi
+            mkdir -p android/app/src/main/res/mipmap-xhdpi
+            mkdir -p android/app/src/main/res/mipmap-hdpi
+            mkdir -p android/app/src/main/res/mipmap-mdpi
+            
+            cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+            cp icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+            cp icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+            cp icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+            cp icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+            
+            cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+            cp icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+            cp icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+            cp icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+            cp icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+            echo "Successfully applied icon.png to Android mipmap directories."
+          else
+            echo "Warning: icon.png not found in root directory!"
+          fi
+
+      - name: Sync Capacitor
+        run: |
           npx cap sync
 
       - name: Decode Release Keystore from GitHub Secrets
