@@ -40,7 +40,7 @@ jobs:
       - name: Generate App Icons from icon.png
         run: |
           npm install @capacitor/assets --save-dev
-          npx capacitor-assets generate --android --asset-path .
+          npx capacitor-assets generate --android --icon icon.png
 
       - name: Sync Capacitor
         run: |
