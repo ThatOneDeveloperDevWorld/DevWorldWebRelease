@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android Release
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
       - name: Organize Web Files for Capacitor
         run: |
           mkdir -p www
-          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'android' ! -name 'www' ! -name 'package.json' ! -name 'package-lock.json' -exec mv -t www/ {} +
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'android' ! -name 'www' ! -name 'package.json' ! -name 'package-lock.json' ! -name 'icon.png' -exec mv -t www/ {} +
 
       - name: Initialize Capacitor and Add Android
         run: |
@@ -38,9 +38,13 @@ jobs:
           npx cap add android
           npx cap sync
 
+      - name: Generate App Icons from icon.png
+        run: |
+          npm install @capacitor/assets --save-dev
+          npx capacitor-assets generate --android
+
       - name: Fix Kotlin Version Conflicts
         run: |
-          # Appends a resolution strategy to force matching Kotlin versions in Gradle
           echo "" >> android/build.gradle
           echo "subprojects {" >> android/build.gradle
           echo "    configurations.all {" >> android/build.gradle
@@ -52,15 +56,24 @@ jobs:
           echo "    }" >> android/build.gradle
           echo "}" >> android/build.gradle
 
-      - name: Build Android App (Gradle)
+      - name: Decode Release Keystore from GitHub Secrets
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/devworldrelease.jks
+
+      - name: Build Signed Release APK (Gradle)
+        env:
+          RELEASE_STORE_FILE: devworldrelease.jks
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
-      - name: Upload APK Artifact
+      - name: Upload Signed APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: devworld-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: DevWorldApp
+          path: android/app/build/outputs/apk/release/app-release.apk
           
