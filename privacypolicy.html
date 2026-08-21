@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Dev World v0.1.5</title>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #5ce1e6;
+            background-image: url('');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #212529;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        .clouds-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .top-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .logo-img {
+            max-width: 280px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 5px;
+            filter: drop-shadow(3px 3px 0px #000);
+        }
+
+        .version-text {
+            font-size: 14px;
+            font-weight: 800;
+            color: #000;
+        }
+
+        .center-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .policy-card {
+            background: #ffffff;
+            border: 4px solid #000000;
+            border-radius: 20px;
+            box-shadow: 0 8px 0px #000000;
+            width: 100%;
+            padding: 40px 30px;
+            text-align: left;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .policy-card h2 {
+            margin-top: 0;
+            font-weight: 900;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .policy-card h3 {
+            font-weight: 800;
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            color: #111;
+        }
+
+        .policy-card p, .policy-card li {
+            font-size: 14px;
+            line-height: 1.5;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .policy-card ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .update-date {
+            font-size: 12px;
+            color: #666;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        .btn-back {
+            display: inline-block;
+            width: 100%;
+            max-width: 250px;
+            padding: 12px;
+            background: #ff5964;
+            color: #fff;
+            border: 3px solid #000000;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #000000;
+            text-decoration: none;
+            text-align: center;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            margin-top: 20px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .btn-back:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #000000;
+        }
+
+        .footer-scene {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .footer-img {
+            width: 100%;
+            height: auto;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="clouds-bg"></div>
+
+    <div class="top-container">
+        <img src="https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/logo1.png?raw=true" alt="Dev World Logo" class="logo-img">
+        <div class="version-text">v0.1.5 - Privacy Policy</div>
+    </div>
+
+    <div class="center-container">
+        <div class="policy-card">
+            <h2>Privacy Policy</h2>
+            <span class="update-date">Effective Date: August 21, 2026</span>
+
+            <p>Welcome to <strong>Dev World</strong>. We respect your privacy and are committed to protecting your personal data when you use our application and services.</p>
+
+            <h3>1. Information We Collect</h3>
+            <p>When you register or log in, we collect basic profile details via Firebase Authentication, such as your email address, display name, and unique user identifier to manage your account.</p>
+
+            <h3>2. How We Use Your Information</h3>
+            <p>Your data is used strictly to:</p>
+            <ul>
+                <li>Maintain and secure your user account.</li>
+                <li>Load your game data, profile info, and custom projects.</li>
+                <li>Enforce community guidelines and maintain platform safety.</li>
+            </ul>
+
+            <h3>3. Data Security</h3>
+            <p>We use Google Firebase backend infrastructure and security controls to safeguard your data against unauthorized access or disclosure.</p>
+
+            <h3>4. Third-Party Services</h3>
+            <p>We utilize Firebase Auth and Firestore for managing player accounts and core features. Google's privacy policies govern these backend features.</p>
+
+            <h3>5. Contact Us</h3>
+            <p>If you have questions regarding this policy, you can reach out via our official developer support channels.</p>
+        </div>
+    </div>
+
+    <a href="index.html" class="btn-back">Back to Home</a>
+
+    <div class="footer-scene">
+        <img src="https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/screenlogin1.png?raw=true" alt="Characters and Scenery" class="footer-img">
+    </div>
+
+</body>
+  </html>
+  
