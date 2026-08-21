@@ -43,6 +43,29 @@ jobs:
           npm install @capacitor/assets --save-dev
           npx capacitor-assets generate --android
 
+      - name: Decode Release Keystore from GitHub Secrets
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/devworldrelease.jks
+
+      - name: Inject Signing Configuration into Gradle
+        run: |
+          echo "" >> android/app/build.gradle
+          echo "android {" >> android/app/build.gradle
+          echo "    signingConfigs {" >> android/app/build.gradle
+          echo "        release {" >> android/app/build.gradle
+          echo "            storeFile file('devworldrelease.jks')" >> android/app/build.gradle
+          echo "            storePassword '${{ secrets.RELEASE_KEYSTORE_PASSWORD }}'" >> android/app/build.gradle
+          echo "            keyAlias '${{ secrets.RELEASE_KEY_ALIAS }}'" >> android/app/build.gradle
+          echo "            keyPassword '${{ secrets.RELEASE_KEY_PASSWORD }}'" >> android/app/build.gradle
+          echo "        }" >> android/app/build.gradle
+          echo "    }" >> android/app/build.gradle
+          echo "    buildTypes {" >> android/app/build.gradle
+          echo "        release {" >> android/app/build.gradle
+          echo "            signingConfig signingConfigs.release" >> android/app/build.gradle
+          echo "        }" >> android/app/build.gradle
+          echo "    }" >> android/app/build.gradle
+          echo "}" >> android/app/build.gradle
+
       - name: Fix Kotlin Version Conflicts
         run: |
           echo "" >> android/build.gradle
@@ -56,16 +79,7 @@ jobs:
           echo "    }" >> android/build.gradle
           echo "}" >> android/build.gradle
 
-      - name: Decode Release Keystore from GitHub Secrets
-        run: |
-          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/devworldrelease.jks
-
       - name: Build Signed Release APK (Gradle)
-        env:
-          RELEASE_STORE_FILE: devworldrelease.jks
-          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
           cd android
           chmod +x gradlew
@@ -75,5 +89,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DevWorldApp
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/**/*.apk
           
