@@ -36,6 +36,40 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "Dev World" com.devworld.app --web-dir www
           npx cap add android
+
+      - name: Process and Apply App Icon via Python
+        run: |
+          python3 -c "
+          import os
+          from PIL import Image
+
+          icon_path = 'icon.png'
+          if os.path.exists(icon_path):
+              img = Image.open(icon_path).convert('RGBA')
+              
+              sizes = {
+                  'mipmap-mdpi': 48,
+                  'mipmap-hdpi': 72,
+                  'mipmap-xhdpi': 96,
+                  'mipmap-xxhdpi': 144,
+                  'mipmap-xxxhdpi': 192
+              }
+              
+              base_dir = 'android/app/src/main/res'
+              for folder, size in sizes.items():
+                  res_dir = os.path.join(base_dir, folder)
+                  os.makedirs(res_dir, exist_ok=True)
+                  
+                  resized = img.resize((size, size), Image.Resampling.LANCZOS)
+                  resized.save(os.path.join(res_dir, 'ic_launcher.png'), 'PNG')
+                  resized.save(os.path.join(res_dir, 'ic_launcher_round.png'), 'PNG')
+              print('Successfully generated and applied custom app icons!')
+          else:
+              print('icon.png not found, skipping custom icon generation.')
+          "
+
+      - name: Sync Capacitor
+        run: |
           npx cap sync
 
       - name: Decode Release Keystore from GitHub Secrets
