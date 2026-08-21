@@ -39,6 +39,7 @@ jobs:
 
       - name: Process and Apply App Icon via Python
         run: |
+          pip install Pillow
           python3 -c "
           import os
           from PIL import Image
