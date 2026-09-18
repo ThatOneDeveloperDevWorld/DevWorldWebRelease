@@ -37,7 +37,24 @@ jobs:
           npx cap init "Dev World" com.devworld.app --web-dir www
           npx cap add android
 
-      - name: Process and Apply Full App Icon Set via Python
+      - name: Set App Version to 0.1.6
+        run: |
+          python3 -c "
+          build_path = 'android/app/build.gradle'
+          with open(build_path, 'r') as f:
+              content = f.read()
+          
+          if 'versionName' in content:
+              import re
+              content = re.sub(r'versionName \"[^\"]+\"', 'versionName \"0.1.6\"', content)
+              content = re.sub(r'versionCode \d+', 'versionCode 6', content)
+          
+          with open(build_path, 'w') as f:
+              f.write(content)
+          print('Successfully updated build.gradle version to 0.1.6!')
+          "
+
+      - name: Process and Apply Full App Icon Set via Python (with Zoom Fix)
         run: |
           pip install Pillow
           python3 -c "
@@ -58,7 +75,7 @@ jobs:
               
               base_dir = 'android/app/src/main/res'
               
-              # 1. Generate standard legacy icons
+              # 1. Generate standard legacy icons (fill full size)
               for folder, size in sizes.items():
                   res_dir = os.path.join(base_dir, folder)
                   os.makedirs(res_dir, exist_ok=True)
@@ -67,7 +84,7 @@ jobs:
                   resized.save(os.path.join(res_dir, 'ic_launcher.png'), 'PNG')
                   resized.save(os.path.join(res_dir, 'ic_launcher_round.png'), 'PNG')
 
-              # 2. Generate adaptive layers (108x108 for xxxhdpi base reference)
+              # 2. Generate adaptive layers with safe-zone padding (prevents zoom/clipping)
               adaptive_sizes = {
                   'mipmap-mdpi': 108,
                   'mipmap-hdpi': 162,
@@ -80,13 +97,19 @@ jobs:
                   res_dir = os.path.join(base_dir, folder)
                   os.makedirs(res_dir, exist_ok=True)
                   
-                  # Foreground and background layers for adaptive icons
-                  adaptive_img = img.resize((size, size), Image.Resampling.LANCZOS)
-                  adaptive_img.save(os.path.join(res_dir, 'ic_launcher_foreground.png'), 'PNG')
+                  # Create a transparent canvas for the foreground
+                  foreground = Image.new('RGBA', (size, size), (0, 0, 0, 0))
                   
-                  # Solid or matching background layer
+                  # Scale down image to ~72% to fit inside the Android safe zone
+                  inner_size = int(size * 0.72)
+                  offset = (size - inner_size) // 2
+                  
+                  resized_fg = img.resize((inner_size, inner_size), Image.Resampling.LANCZOS)
+                  foreground.paste(resized_fg, (offset, offset), resized_fg)
+                  foreground.save(os.path.join(res_dir, 'ic_launcher_foreground.png'), 'PNG')
+                  
+                  # Solid background layer
                   bg_img = Image.new('RGBA', (size, size), (255, 255, 255, 255))
-                  bg_img.paste(adaptive_img, (0, 0), adaptive_img)
                   bg_img.save(os.path.join(res_dir, 'ic_launcher_background.png'), 'PNG')
 
               # 3. Create anydpi-v26 xml definitions
@@ -104,7 +127,7 @@ jobs:
               with open(os.path.join(anydpi_dir, 'ic_launcher_round.xml'), 'w') as f:
                   f.write(xml_content)
 
-              print('Successfully generated complete legacy and adaptive icon architecture!')
+              print('Successfully generated padded adaptive icons and fixed zoom issue!')
           else:
               print('icon.png not found.')
           "
