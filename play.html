@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dev World - Play</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -11,64 +15,83 @@
 
     <style>
         * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        
         body {
             background: #111;
             color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 10px;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
+            position: fixed;
         }
 
         .game-wrapper {
-            position: relative;
-            border: 4px solid #000;
-            border-radius: 12px;
-            box-shadow: 0 8px 0px #87CEEB;
-            overflow: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background: #87CEEB;
-            width: 380px;
-            height: 380px;
-            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
 
         canvas {
             display: block;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
         }
 
         .hud {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
+            top: 15px;
+            left: 15px;
+            right: 15px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             pointer-events: none;
-            font-weight: bold;
-            font-size: 14px;
-            text-shadow: 1px 1px 0px #000;
             z-index: 10;
+        }
+
+        .hud-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            pointer-events: auto;
+        }
+
+        #level-title-display {
+            font-size: 18px;
+            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 1px;
+        }
+
+        .engine-version {
+            font-size: 12px;
+            color: #ffffff;
+            text-shadow: 1px 1px 0px #000;
         }
 
         .btn-exit {
             background: #ff595e;
             color: white;
             border: 2px solid #000;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 8px;
-            font-weight: 800;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
             cursor: pointer;
             box-shadow: 2px 2px 0px #000;
             text-decoration: none;
             pointer-events: auto;
+            text-shadow: none;
         }
 
         .btn-exit:active {
@@ -76,55 +99,60 @@
             box-shadow: 1px 1px 0px #000;
         }
 
-        .mobile-controls {
+        .overlay-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            max-width: 380px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            padding: 0 10px;
+            align-items: flex-end;
+            padding: 20px 30px;
+            pointer-events: none;
+            z-index: 20;
         }
 
-        .d-pad {
-            display: flex;
-            gap: 10px;
+        .overlay-controls > * {
+            pointer-events: auto;
         }
 
-        .ctrl-btn {
-            width: 60px;
-            height: 60px;
+        .joystick-base {
+            width: 110px;
+            height: 110px;
             background: rgba(255, 255, 255, 0.2);
             border: 3px solid #000;
             border-radius: 50%;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            font-weight: bold;
-            color: #fff;
             box-shadow: 0 4px 0px #000;
-            cursor: pointer;
-            touch-action: manipulation;
+            touch-action: none;
         }
 
-        .ctrl-btn:active, .ctrl-btn.active {
-            background: rgba(255, 255, 255, 0.4);
-            transform: translateY(2px);
-            box-shadow: 0 2px 0px #000;
+        .joystick-stick {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 3px solid #000;
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 3px 0px #000;
+            pointer-events: none;
+            transform: translate(0px, 0px);
         }
 
         .jump-btn {
-            width: 75px;
-            height: 75px;
-            background: #ffb703;
+            width: 80px;
+            height: 80px;
+            background: #03ff9c;
             border: 3px solid #000;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            font-weight: 900;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 28px;
             color: #000;
             box-shadow: 0 5px 0px #000;
             cursor: pointer;
@@ -132,7 +160,7 @@
         }
 
         .jump-btn:active, .jump-btn.active {
-            background: #ffd166;
+            background: #b8ffe3;
             transform: translateY(3px);
             box-shadow: 0 2px 0px #000;
         }
@@ -142,20 +170,21 @@
 
     <div class="game-wrapper" id="game-wrapper">
         <div class="hud">
-            <span id="level-title-display">Loading Level...</span>
+            <div class="hud-left">
+                <span id="level-title-display">Loading Level...</span>
+                <span class="engine-version">v0.1892.2892</span>
+            </div>
             <a href="home.html" class="btn-exit">Exit</a>
         </div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <canvas id="gameCanvas" width="800" height="800"></canvas>
     </div>
 
-    <div class="mobile-controls">
-        <div class="d-pad">
-            <div class="ctrl-btn" id="btn-left">◀</div>
-            <div class="ctrl-btn" id="btn-right">▶</div>
+    <div class="overlay-controls">
+        <div class="joystick-base" id="joystick-base">
+            <div class="joystick-stick" id="joystick-stick"></div>
         </div>
-        <div class="jump-btn" id="btn-jump">JUMP</div>
+        <div class="jump-btn" id="btn-jump">A</div>
     </div>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
@@ -170,18 +199,32 @@
         const db = firebase.firestore();
 
         const tileImages = {
-            grass: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled342_20260812162232.png?raw=true",
-            dirt: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled343_20260812162324.png?raw=true",
-            brick: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled341_20260812162119.png?raw=true",
-            sand: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled360_20260820135759.png?raw=true",
-            player: "https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled340_20260812161929.png?raw=true"
+            grass: "Untitled342_20260812162232.png",
+            dirt: "Untitled343_20260812162324.png",
+            brick: "Untitled341_20260812162119.png",
+            sand: "Untitled360_20260820135759.png",
+            player: "Untitled340_20260812161929.png",
+            water: "water.png",
+            bridge: "bridge.png",
+            cloud: "cloud.png",
+            bush: "bush.png",
+            tree: "tree.png",
+            spike: "spike.png",
+            lava: "lava.png"
         };
 
         const tileFallbackColors = {
             grass: '#4bb543',
             dirt: '#8b5a2b',
             brick: '#a52a2a',
-            sand: '#e9c46a'
+            sand: '#e9c46a',
+            water: '#3a86ff',
+            bridge: '#9c6644',
+            cloud: '#ffffff',
+            bush: '#2b9348',
+            tree: '#007f5f',
+            spike: '#ff0054',
+            lava: '#fb8500'
         };
 
         const loadedImages = {};
@@ -194,39 +237,120 @@
         }
 
         let levelData = null;
-        let player = { x: 50, y: 50, w: 20, h: 20, vx: 0, vy: 0, speed: 3, jump: -8, grounded: false };
+        let player = { x: 100, y: 100, w: 40, h: 40, vx: 0, vy: 0, speed: 5, jump: -13, grounded: false };
         let keys = {};
+        let lavaTimer = 0;
 
         function setupMobileControls() {
-            const bindTouch = (elemId, keyCode) => {
-                const el = document.getElementById(elemId);
-                if (!el) return;
+            const jumpBtn = document.getElementById('btn-jump');
+            let jumpTouchId = null;
 
-                el.addEventListener('touchstart', (e) => {
+            if (jumpBtn) {
+                jumpBtn.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    keys[keyCode] = true;
-                    el.classList.add('active');
+                    let touch = e.changedTouches[0];
+                    jumpTouchId = touch.identifier;
+                    keys['Space'] = true;
+                    jumpBtn.classList.add('active');
                 }, { passive: false });
 
-                el.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    keys[keyCode] = false;
-                    el.classList.remove('active');
-                }, { passive: false });
+                const handleJumpEnd = (e) => {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === jumpTouchId) {
+                            keys['Space'] = false;
+                            jumpBtn.classList.remove('active');
+                            jumpTouchId = null;
+                        }
+                    }
+                };
 
-                el.addEventListener('mousedown', (e) => {
-                    keys[keyCode] = true;
-                    el.classList.add('active');
-                });
-                el.addEventListener('mouseup', (e) => {
-                    keys[keyCode] = false;
-                    el.classList.remove('active');
-                });
+                jumpBtn.addEventListener('touchend', handleJumpEnd, { passive: false });
+                jumpBtn.addEventListener('touchcancel', handleJumpEnd, { passive: false });
+
+                jumpBtn.addEventListener('mousedown', (e) => { e.preventDefault(); keys['Space'] = true; jumpBtn.classList.add('active'); });
+                jumpBtn.addEventListener('mouseup', (e) => { e.preventDefault(); keys['Space'] = false; jumpBtn.classList.remove('active'); });
+            }
+
+            const base = document.getElementById('joystick-base');
+            const stick = document.getElementById('joystick-stick');
+            let joystickTouchId = null;
+            let center = { x: 0, y: 0 };
+            const maxDist = 35;
+
+            base.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (joystickTouchId === null) {
+                    let touch = e.changedTouches[0];
+                    joystickTouchId = touch.identifier;
+                    const rect = base.getBoundingClientRect();
+                    center.x = rect.left + rect.width / 2;
+                    center.y = rect.top + rect.height / 2;
+                    updateJoystickPosition(touch.clientX, touch.clientY);
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchmove', (e) => {
+                if (joystickTouchId === null) return;
+                for (let i = 0; i < e.touches.length; i++) {
+                    if (e.touches[i].identifier === joystickTouchId) {
+                        e.preventDefault();
+                        updateJoystickPosition(e.touches[i].clientX, e.touches[i].clientY);
+                        break;
+                    }
+                }
+            }, { passive: false });
+
+            const handleJoystickEnd = (e) => {
+                if (joystickTouchId === null) return;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === joystickTouchId) {
+                        joystickTouchId = null;
+                        stick.style.transform = `translate(0px, 0px)`;
+                        keys['ArrowLeft'] = false;
+                        keys['ArrowRight'] = false;
+                    }
+                }
             };
 
-            bindTouch('btn-left', 'ArrowLeft');
-            bindTouch('btn-right', 'ArrowRight');
-            bindTouch('btn-jump', 'Space');
+            window.addEventListener('touchend', handleJoystickEnd);
+            window.addEventListener('touchcancel', handleJoystickEnd);
+
+            function updateJoystickPosition(clientX, clientY) {
+                let dx = clientX - center.x;
+                let dy = clientY - center.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist > maxDist) {
+                    dx = (dx / dist) * maxDist;
+                    dy = (dy / dist) * maxDist;
+                }
+
+                stick.style.transform = `translate(${dx}px, ${dy}px)`;
+
+                keys['ArrowLeft'] = dx < -6;
+                keys['ArrowRight'] = dx > 6;
+            }
+
+            let mouseActive = false;
+            base.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                mouseActive = true;
+                const rect = base.getBoundingClientRect();
+                center.x = rect.left + rect.width / 2;
+                center.y = rect.top + rect.height / 2;
+                updateJoystickPosition(e.clientX, e.clientY);
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (!mouseActive) return;
+                updateJoystickPosition(e.clientX, e.clientY);
+            });
+            window.addEventListener('mouseup', () => {
+                if (!mouseActive) return;
+                mouseActive = false;
+                stick.style.transform = `translate(0px, 0px)`;
+                keys['ArrowLeft'] = false;
+                keys['ArrowRight'] = false;
+            });
         }
 
         async function initGamePlayer() {
@@ -240,11 +364,11 @@
                 const temp = sessionStorage.getItem('tempLevelGrid');
                 if (temp) {
                     levelData = JSON.parse(temp);
-                    document.getElementById('level-title-display').innerText = "🧪 TEST MODE";
+                    document.getElementById('level-title-display').innerText = "TEST MODE";
                     setupLevel();
                 } else {
                     alert("No test level data found.");
-                    window.location.href = 'studio.html';
+                    window.location.href = 'editor.html';
                 }
             } else if (gameId) {
                 try {
@@ -302,7 +426,7 @@
                         window.location.href = 'home.html';
                     }
                 } catch (err) {
-                    console.error("Error loading game:", err);
+                    console.error("Error loading level:", err);
                 }
             } else {
                 alert("No level selected.");
@@ -314,7 +438,7 @@
             document.getElementById('game-wrapper').style.backgroundColor = levelData.bgColor || "#87CEEB";
             
             if (levelData.content.playerStart) {
-                let boxSize = 400;
+                let boxSize = 800;
                 let tileSize = boxSize / levelData.cols;
                 player.x = levelData.content.playerStart.x * tileSize;
                 player.y = levelData.content.playerStart.y * tileSize;
@@ -336,33 +460,37 @@
         }
 
         function updatePhysics() {
-            let boxSize = 400;
+            let boxSize = 800;
             let tileSize = boxSize / levelData.cols;
 
+            // 1. Horizontal Movement & Collision
             player.vx = 0;
             if (keys['ArrowLeft'] || keys['KeyA']) player.vx = -player.speed;
             if (keys['ArrowRight'] || keys['KeyD']) player.vx = player.speed;
 
             player.x += player.vx;
-
             if (player.x < 0) player.x = 0;
             if (player.x > boxSize - player.w) player.x = boxSize - player.w;
 
+            const solidBlocks = ['grass', 'dirt', 'brick', 'sand', 'bridge'];
             levelData.content.blocks.forEach(b => {
-                if (b.type !== 'spike') {
+                if (solidBlocks.includes(b.type)) {
                     let bx = b.x * tileSize;
                     let by = b.y * tileSize;
                     if (isColliding(player.x, player.y, player.w, player.h, bx, by, tileSize, tileSize)) {
-                        if (player.vx > 0) player.x = bx - player.w;
-                        if (player.vx < 0) player.x = bx + tileSize;
+                        if (player.vx > 0) {
+                            player.x = bx - player.w;
+                        } else if (player.vx < 0) {
+                            player.x = bx + tileSize;
+                        }
                     }
                 }
             });
 
-            player.vy += 0.4;
-            player.y += player.vy;
+            // 2. Vertical Movement & Gravity/Collisions
+            let inWater = false;
+            let touchingLava = false;
 
-            player.grounded = false;
             levelData.content.blocks.forEach(b => {
                 let bx = b.x * tileSize;
                 let by = b.y * tileSize;
@@ -371,7 +499,40 @@
                     if (isColliding(player.x, player.y, player.w, player.h, bx + 2, by + 2, tileSize - 4, tileSize - 4)) {
                         resetPlayerPosition();
                     }
-                } else {
+                } else if (b.type === 'lava') {
+                    if (isColliding(player.x, player.y, player.w, player.h, bx, by, tileSize, tileSize)) {
+                        touchingLava = true;
+                    }
+                } else if (b.type === 'water') {
+                    if (isColliding(player.x, player.y, player.w, player.h, bx, by, tileSize, tileSize)) {
+                        inWater = true;
+                    }
+                }
+            });
+
+            if (touchingLava) {
+                lavaTimer++;
+                if (lavaTimer >= 60) {
+                    resetPlayerPosition();
+                }
+            } else {
+                lavaTimer = 0;
+            }
+
+            if (inWater) {
+                player.vy += 0.2;
+                if (player.vy > 2.5) player.vy = 2.5;
+            } else {
+                player.vy += 0.6;
+            }
+
+            player.y += player.vy;
+            player.grounded = false;
+
+            levelData.content.blocks.forEach(b => {
+                if (solidBlocks.includes(b.type)) {
+                    let bx = b.x * tileSize;
+                    let by = b.y * tileSize;
                     if (isColliding(player.x, player.y, player.w, player.h, bx, by, tileSize, tileSize)) {
                         if (player.vy > 0) {
                             player.y = by - player.h;
@@ -385,8 +546,8 @@
                 }
             });
 
-            if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && player.grounded) {
-                player.vy = player.jump;
+            if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && (player.grounded || inWater)) {
+                player.vy = inWater ? -6 : player.jump;
                 player.grounded = false;
             }
 
@@ -396,8 +557,9 @@
         }
 
         function resetPlayerPosition() {
+            lavaTimer = 0;
             if (levelData.content.playerStart) {
-                let boxSize = 400;
+                let boxSize = 800;
                 let tileSize = boxSize / levelData.cols;
                 player.x = levelData.content.playerStart.x * tileSize;
                 player.y = levelData.content.playerStart.y * tileSize;
@@ -412,7 +574,7 @@
         function renderGame() {
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
-            let boxSize = 400;
+            let boxSize = 800;
             let tileSize = boxSize / levelData.cols;
 
             ctx.clearRect(0, 0, boxSize, boxSize);
@@ -421,12 +583,7 @@
                 let bx = b.x * tileSize;
                 let by = b.y * tileSize;
 
-                if (b.type === 'spike') {
-                    ctx.font = `${Math.floor(tileSize * 0.8)}px sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('⚠️', bx + tileSize / 2, by + tileSize / 2);
-                } else if (loadedImages[b.type] && loadedImages[b.type].complete && loadedImages[b.type].naturalWidth !== 0) {
+                if (loadedImages[b.type] && loadedImages[b.type].complete && loadedImages[b.type].naturalWidth !== 0) {
                     ctx.drawImage(loadedImages[b.type], bx, by, tileSize, tileSize);
                 } else {
                     ctx.fillStyle = tileFallbackColors[b.type] || '#888';
