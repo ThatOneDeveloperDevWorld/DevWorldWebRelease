@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dev World - Studio</title>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -18,7 +22,7 @@
             background-position: center;
             background-repeat: no-repeat;
             color: #212529;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -76,8 +80,8 @@
             padding: 6px 12px;
             border: 2px solid #000;
             border-radius: 8px;
-            font-weight: 800;
-            font-size: 12px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
             cursor: pointer;
             box-shadow: 2px 2px 0px #000;
             text-decoration: none;
@@ -104,13 +108,12 @@
             border: 2px solid #000;
             border-radius: 8px;
             background: #f8f9fa;
-            font-weight: 600;
-            font-size: 13px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
         }
 
         .label-title {
-            font-size: 10px;
-            font-weight: 800;
+            font-size: 12px;
             display: block;
             margin-bottom: 2px;
         }
@@ -148,10 +151,10 @@
             padding: 8px;
             border: 2px solid #000;
             border-radius: 8px;
-            font-weight: 800;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
             background: #e9ecef;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .palette-drawer {
@@ -203,8 +206,8 @@
             padding: 10px;
             border: 2px solid #000;
             border-radius: 10px;
-            font-weight: 800;
-            font-size: 13px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
             cursor: pointer;
             box-shadow: 2px 2px 0px #000;
             text-align: center;
@@ -227,8 +230,8 @@
             color: #fff;
             padding: 8px 16px;
             border-radius: 8px;
-            font-weight: bold;
-            font-size: 12px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
             transition: transform 0.2s ease;
             z-index: 1000;
             border: 2px solid #fff;
@@ -269,9 +272,9 @@
         <div>
             <label class="label-title">SELECT CATEGORY</label>
             <select id="category-select" class="category-select" onchange="switchCategory()">
-                <option value="tiles">Tiles</option>
-                <option value="decor">Decor</option>
-                <option value="traps">Hazards</option>
+                <option value="tiles">🧱 Blocks & Tiles</option>
+                <option value="decor">🌿 Decor & Elements</option>
+                <option value="traps">⚠️ Hazards & Spikes</option>
             </select>
         </div>
 
@@ -283,8 +286,7 @@
         </div>
     </div>
 
-    <div class="toast" id="toast">Saved</div>
-
+    <div class="toast" id="toast">Saved!</div>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
@@ -297,24 +299,38 @@
 
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
+        // Force long polling to prevent hanging requests on local/restricted setups
+        db.settings({ experimentalForceLongPolling: true });
 
         let currentUser = null;
         firebase.auth().onAuthStateChanged((user) => {
-            if (user) { currentUser = user; } else { window.location.href = "index.html"; }
+            if (user) { 
+                currentUser = user; 
+            } else { 
+                firebase.auth().signInAnonymously().catch((error) => {
+                    console.error("Auth fallback failed:", error);
+                });
+            }
         });
 
         const catalog = {
             tiles: [
-                { id: 'grass', name: 'Grass', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled342_20260812162232.png' },
-                { id: 'dirt', name: 'Dirt', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled343_20260812162324.png' },
-                { id: 'brick', name: 'Brick', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled341_20260812162119.png' },
-                { id: 'sand', name: 'Sand', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled360_20260820135759.png' }
+                { id: 'grass', name: 'Grass', img: 'Untitled342_20260812162232.png' },
+                { id: 'dirt', name: 'Dirt', img: 'Untitled343_20260812162324.png' },
+                { id: 'brick', name: 'Brick', img: 'Untitled341_20260812162119.png' },
+                { id: 'sand', name: 'Sand', img: 'Untitled360_20260820135759.png' },
+                { id: 'water', name: 'Water', img: 'water.png' },
+                { id: 'bridge', name: 'Bridge', img: 'bridge.png' }
             ],
             decor: [
-                { id: 'player', name: 'Player Spawn', img: 'https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled340_20260812161929.png' }
+                { id: 'player', name: 'Player Spawn', img: 'Untitled340_20260812161929.png' },
+                { id: 'cloud', name: 'Cloud', img: 'cloud.png' },
+                { id: 'bush', name: 'Bush', img: 'bush.png' },
+                { id: 'tree', name: 'Tree', img: 'tree.png' }
             ],
             traps: [
-                { id: 'spike', name: 'Spike', emoji: '⚠️' }
+                { id: 'spike', name: 'Spike', img: 'spike.png' },
+                { id: 'lava', name: 'Lava', img: 'lava.png' }
             ]
         };
 
@@ -403,6 +419,8 @@
         function renderCells() {
             const container = document.getElementById('grid-container');
             const cells = container.children;
+            const flatCatalog = [...catalog.tiles, ...catalog.decor, ...catalog.traps];
+
             for (let i = 0; i < cells.length; i++) {
                 let cell = cells[i];
                 let x = parseInt(cell.dataset.x);
@@ -413,19 +431,14 @@
 
                 let block = levelData.blocks.find(b => b.x === x && b.y === y);
                 if (block) {
-                    if (block.type === 'spike') {
-                        cell.innerHTML = '<span style="font-size:12px; display:flex; align-items:center; justify-content:center; height:100%;">⚠️</span>';
-                    } else {
-                        let flatCat = [...catalog.tiles, ...catalog.decor];
-                        let found = flatCat.find(c => c.id === block.type);
-                        if (found && found.img) {
-                            cell.style.backgroundImage = `url('${found.img}')`;
-                        }
+                    let found = flatCatalog.find(c => c.id === block.type);
+                    if (found && found.img) {
+                        cell.style.backgroundImage = `url('${found.img}')`;
                     }
                 }
 
                 if (levelData.playerStart && levelData.playerStart.x === x && levelData.playerStart.y === y) {
-                    cell.style.backgroundImage = `url('https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled340_20260812161929.png')`;
+                    cell.style.backgroundImage = `url('Untitled340_20260812161929.png')`;
                 }
             }
         }
@@ -484,8 +497,6 @@
         }
 
         async function publishGame() {
-            if (!currentUser) return;
-
             const title = document.getElementById('game-title-input').value.trim();
             if (!title) {
                 alert("Please enter a custom game title to publish!");
@@ -493,29 +504,41 @@
                 return;
             }
 
-            const gameContents = {
+            let authorId = currentUser ? currentUser.uid : "anonymous_dev";
+
+            const gamePayload = {
                 title: title,
-                authorId: currentUser.uid,
-                creatorId: currentUser.uid,
+                authorId: authorId,
+                creatorId: authorId,
                 genre: "Platformer",
                 cols: currentSize,
                 rows: currentSize,
-                bgColor: document.getElementById('bg-color').value,
+                bgColor: document.getElementById('bg-color').value || "#87CEEB",
                 visits: 0,
                 content: levelData,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             try {
-                showToast("Publishing level...");
-                await db.collection("games").add(gameContents);
+                showToast("Publishing...");
+                
+                // Add a timeout safeguard so it errors out if Firestore hangs silently
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Publishing timed out. Check your connection or Firebase rules.")), 6000)
+                );
+
+                await Promise.race([
+                    db.collection("games").add(gamePayload),
+                    timeoutPromise
+                ]);
+
                 showToast("Published successfully!");
                 setTimeout(() => window.location.href = 'home.html', 1500);
             } catch (err) {
+                console.error("Publish error details:", err);
                 alert("Publish failed: " + err.message);
             }
         }
     </script>
 </body>
-    </html>
-    
+</html>
