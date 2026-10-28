@@ -169,8 +169,7 @@
         const db = firebase.firestore();
         db.settings({ experimentalForceLongPolling: true });
 
-        // Fix for file:// protocol: Set Auth Persistence to NONE or SESSION so it doesn't crash on local file origins
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
             .catch((error) => {
                 console.warn("Auth persistence error (file:// fallback active):", error.message);
             });
