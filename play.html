@@ -71,6 +71,20 @@
             font-size: 18px;
             text-shadow: 2px 2px 0px #000;
             letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .creator-link {
+            font-size: 13px;
+            color: #5ce1e6;
+            text-shadow: 1px 1px 0px #000;
+            text-decoration: underline;
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        .creator-link:hover {
+            color: #ffffff;
         }
 
         .engine-version {
@@ -166,13 +180,14 @@
         }
     </style>
 </head>
-<body onload="initGamePlayer()">
+<body>
 
     <div class="game-wrapper" id="game-wrapper">
         <div class="hud">
             <div class="hud-left">
                 <span id="level-title-display">Loading Level...</span>
-                <span class="engine-version">v0.1892.2892</span>
+                <a id="creator-display" class="creator-link" style="display: none;">By Unknown</a>
+                <span class="engine-version">v0.1.32.8</span>
             </div>
             <a href="home.html" class="btn-exit">Exit</a>
         </div>
@@ -185,6 +200,7 @@
         </div>
         <div class="jump-btn" id="btn-jump">A</div>
     </div>
+    
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
@@ -377,14 +393,39 @@
                     if (doc.exists) {
                         const data = doc.data();
                         document.getElementById('level-title-display').innerText = data.title || "Community Level";
+                        
+                        const creatorId = data.authorId || data.creatorId;
+                        let creatorName = data.creatorUsername || data.Username || "";
+
+                        if (creatorId) {
+                            try {
+                                const userDoc = await db.collection("users").doc(creatorId).get();
+                                if (userDoc.exists) {
+                                    const uData = userDoc.data();
+                                    creatorName = uData.Username || uData.username || creatorName || "Unknown";
+                                }
+                            } catch (e) {
+                                console.warn("Could not fetch creator profile details", e);
+                            }
+                        }
+
+                        if (!creatorName) creatorName = "Unknown Creator";
+
+                        const creatorEl = document.getElementById('creator-display');
+                        creatorEl.innerText = `By ${creatorName}`;
+                        creatorEl.style.display = 'block';
+                        if (creatorId) {
+                            creatorEl.onclick = () => {
+                                window.location.href = `userprofile.html?id=${creatorId}`;
+                            };
+                        }
+
                         levelData = {
                             cols: data.cols || 16,
                             rows: data.rows || 16,
                             bgColor: data.bgColor || "#87CEEB",
                             content: data.content
                         };
-
-                        const creatorId = data.authorId || data.creatorId;
 
                         firebase.auth().onAuthStateChanged(async (user) => {
                             const isCreator = user && (user.uid === data.authorId || user.uid === data.creatorId);
@@ -463,7 +504,6 @@
             let boxSize = 800;
             let tileSize = boxSize / levelData.cols;
 
-            // 1. Horizontal Movement & Collision
             player.vx = 0;
             if (keys['ArrowLeft'] || keys['KeyA']) player.vx = -player.speed;
             if (keys['ArrowRight'] || keys['KeyD']) player.vx = player.speed;
@@ -487,7 +527,6 @@
                 }
             });
 
-            // 2. Vertical Movement & Gravity/Collisions
             let inWater = false;
             let touchingLava = false;
 
@@ -598,6 +637,11 @@
                 ctx.fillRect(player.x, player.y, player.w, player.h);
             }
         }
+
+        // Safe DOM Content Loaded Initializer
+        window.addEventListener('DOMContentLoaded', () => {
+            initGamePlayer();
+        });
     </script>
 </body>
 </html>

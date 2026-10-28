@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Banned - Dev World</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <style>
+        * { box-sizing: border-box; user-select: none; }
+        body, html {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #87f2b7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .mobile-app-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            background-color: #87f2b7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            border: none;
+            box-shadow: none;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .clouds-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-repeat: repeat;
+            background-size: 400px;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .ban-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .ban-img {
+            max-width: 200px;
+            width: 70%;
+            height: auto;
+            filter: none;
+        }
+
+        .ban-text {
+            font-size: 24px;
+            color: #000000;
+            text-shadow: 2px 2px 0px #ffffff;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .btn-logout {
+            width: 100%;
+            max-width: 220px;
+            padding: 12px;
+            background: #5ce1e6;
+            color: #000000;
+            border: 4px solid #000000;
+            border-radius: 20px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 20px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #000000;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            margin-top: 10px;
+        }
+
+        .btn-logout:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0px #000000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-app-container">
+        <div class="clouds-bg"></div>
+
+        <div class="ban-content">
+            <img src="BannedWarning.png" alt="Banned Warning" class="ban-img" onerror="this.src='https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/logo1.png?raw=true'">
+            <p class="ban-text">your account has been banned.</p>
+            <button id="logout-btn" class="btn-logout">LOGOUT</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                alert("Error logging out: " + error.message);
+            });
+        });
+    </script>
+</body>
+</html>

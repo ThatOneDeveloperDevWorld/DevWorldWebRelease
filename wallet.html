@@ -14,7 +14,7 @@
         
         body {
             background-color: #5ce1e6;
-            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-image: url('https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled338_20260812133205.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -34,7 +34,7 @@
             left: 0;
             width: 200%;
             height: 200%;
-            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-image: url('https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled338_20260812133205.png');
             background-repeat: repeat-x;
             background-size: contain;
             opacity: 0.8;
@@ -76,7 +76,7 @@
             border: 3px solid #000000;
             border-radius: 14px;
             box-shadow: 0 5px 0px #000000;
-            padding: 25px 20px;
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -85,23 +85,23 @@
         }
 
         .wallet-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 900;
             text-transform: uppercase;
             margin: 0;
         }
 
+        .coin-icon-img {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 0px #000);
+        }
+
         .coin-display {
-            background: #ffb703;
-            border: 3px solid #000;
-            border-radius: 12px;
-            padding: 15px 30px;
             font-size: 28px;
             font-weight: 900;
-            box-shadow: 3px 3px 0px #000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: #000;
         }
 
         .wallet-info {
@@ -112,49 +112,65 @@
             line-height: 1.4;
         }
 
+        /* Fixed Bottom Navigation Bar matching home.html style */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
+            height: 80px;
             background-color: #ffffff;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 10px 0;
+            padding: 0 10px;
             box-shadow: 0 -4px 0px #000000;
             border-top: 3px solid #000000;
             z-index: 1000;
         }
 
         .nav-item {
-            background: #f8f9fa;
-            border: 2px solid #000;
-            border-radius: 8px;
-            color: #000;
-            font-family: inherit;
-            font-size: 12px;
-            font-weight: 800;
+            background: none;
+            border: none;
             cursor: pointer;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 2px;
-            padding: 6px 16px;
-            box-shadow: 2px 2px 0px #000;
+            justify-content: center;
+            padding: 0;
             text-decoration: none;
             transition: transform 0.1s ease;
         }
 
-        .nav-item:active {
-            transform: translate(1px, 1px);
-            box-shadow: 1px 1px 0px #000;
+        .nav-item img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
         }
 
-        .nav-home { background: #ff70a6; }
-        .nav-create { background: #55ff55; }
-        .nav-profile { background: #48cae4; }
-        
+        .nav-create-item {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            position: relative;
+            bottom: 2.5px;
+            transition: transform 0.1s ease;
+        }
+
+        .nav-create-item img {
+            height: 68px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-item:active, .nav-create-item:active {
+            transform: scale(0.92);
+        }
+
+        /* Popup Modal Styles */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -234,29 +250,32 @@
         </div>
 
         <div class="wallet-card">
-            <h2 class="wallet-title">Your Dev Coins</h2>
+            <h2 class="wallet-title">WALLET</h2>
+            <img src="devcoin.png" alt="Coin" class="coin-icon-img">
             <div class="coin-display" id="coin-balance">
-                🪙 Loading...
+                Loading...
             </div>
             <p class="wallet-info">Earn Dev Coins when players visit and play the games you create!</p>
         </div>
     </div>
 
+    <!-- Bottom Navigation Bar: Wallet -> Posts -> Create (centered & floating) -> Profile -->
     <nav class="bottom-nav">
-        <a href="home.html" class="nav-item nav-home">
-            <span>🏠</span>
-            Home
+        <a href="wallet.html" class="nav-item">
+            <img src="wallet.png" alt="Wallet">
         </a>
-        <button type="button" class="nav-item nav-create" onclick="openCreateModal()">
-            <span>✏️</span>
-            Create
+        <a href="posts.html" class="nav-item">
+            <img src="posts.png" alt="Posts">
+        </a>
+        <button type="button" class="nav-create-item" onclick="openCreateModal()">
+            <img src="create.png" alt="Create">
         </button>
-        <a href="profile.html" class="nav-item nav-profile">
-            <span>👤</span>
-            Profile
+        <a href="profile.html" class="nav-item">
+            <img src="profile.png" alt="Profile">
         </a>
     </nav>
 
+    <!-- Create Confirmation Popup Modal -->
     <div class="modal-overlay" id="createModal">
         <div class="modal-box">
             <h3 class="modal-title">Create Game</h3>
@@ -283,6 +302,7 @@
         }
 
         const db = firebase.firestore();
+        db.settings({ experimentalForceLongPolling: true });
         const auth = firebase.auth();
 
         async function initWallet() {
@@ -290,7 +310,7 @@
 
             auth.onAuthStateChanged(async (user) => {
                 if (!user) {
-                    coinDisplay.innerText = "🪙 0";
+                    coinDisplay.innerText = "0";
                     return;
                 }
 
@@ -300,6 +320,8 @@
 
                     if (userDoc.exists && userDoc.data().devCoins !== undefined) {
                         coins = userDoc.data().devCoins;
+                    } else if (userDoc.exists && userDoc.data().coins !== undefined) {
+                        coins = userDoc.data().coins;
                     } else {
                         const gamesSnap = await db.collection("games").where("authorId", "==", user.uid).get();
                         gamesSnap.forEach(doc => {
@@ -308,10 +330,10 @@
                         });
                     }
 
-                    coinDisplay.innerText = `🪙 ${coins}`;
+                    coinDisplay.innerText = coins;
                 } catch (error) {
                     console.error("Error fetching wallet data:", error);
-                    coinDisplay.innerText = "🪙 Error";
+                    coinDisplay.innerText = "Error";
                 }
             });
         }
@@ -329,5 +351,4 @@
         }
     </script>
 </body>
-  </html>
-  
+</html>

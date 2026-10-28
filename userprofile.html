@@ -285,7 +285,8 @@
                     document.getElementById("user-games-list").innerHTML = "";
                     return;
                 }
-                
+
+                // Check auth and determine follow status right away
                 firebase.auth().onAuthStateChanged(async (currentUser) => {
                     if (currentUser) {
                         if (currentUser.uid === targetUserId) {
@@ -310,6 +311,7 @@
                     }
                 });
 
+                // Real-time listener for target user profile
                 if (profileUnsubscribe) profileUnsubscribe();
                 profileUnsubscribe = db.collection("users").doc(targetUserId).onSnapshot((docSnap) => {
                     if (docSnap.exists) {
@@ -328,6 +330,7 @@
                     }
                 });
 
+                // Load user games
                 const gamesListEl = document.getElementById("user-games-list");
                 gamesListEl.innerHTML = "";
 
@@ -411,6 +414,7 @@
                     alert(`you have followed ${targetUsername}`);
                 }
 
+                // Explicitly merge data to force creation of the fields if they completely missed them before
                 await myRef.set({ following: myFollowing }, { merge: true });
                 await targetRef.set({ followers: targetFollowers }, { merge: true });
 

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev World - Draw Profile Picture</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            background-color: #5ce1e6;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            touch-action: none;
+            color: #212529;
+        }
+
+        .top-nav {
+            width: 100%;
+            max-width: 340px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background-color: #ffffff;
+            border: 2.5px solid #000;
+            border-radius: 10px;
+            font-weight: 900;
+            padding: 8px 14px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #000;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .nav-btn:active, .tool-btn:active, .palette-swatch:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        .btn-done { background-color: #38b000; color: #fff; margin-left: auto; }
+        .btn-del { background-color: #ff5964; color: #fff; }
+        
+        .settings-icon-btn {
+            background: #ffd166;
+            padding: 6px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 2.5px solid #000;
+            box-shadow: 2px 2px 0px #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-icon-btn img {
+            width: 20px;
+            height: 20px;
+            image-rendering: pixelated;
+        }
+
+        .canvas-wrapper {
+            background: #ffffff;
+            border: 3px solid #000;
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 4px 4px 0px #000;
+            margin-bottom: 15px;
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 9px 12px;
+            border: 2px solid #000;
+            border-radius: 6px;
+            background: #f8f9fa;
+            margin-bottom: 8px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <a href="profile.html" class="nav-btn">⬅</a>
+        <button class="settings-icon-btn" onclick="openSettingsModal()" title="Settings">
+            <img src="settings.png" alt="Settings" onerror="this.src='https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/settings.png'">
+        </button>
+        <button class="nav-btn btn-del" onclick="clearCanvas()">DEL</button>
+        <button class="nav-btn btn-done" onclick="openPublishPrompt()">Done</button>
+    </div>
+
+    <div class="canvas-wrapper">
+        <div id="pixelCanvasContainer" style="width: 300px; height: 300px; border: 2.5px solid #000; display: grid; grid-template-columns: repeat(32, 1fr); grid-template-rows: repeat(32, 1fr); background-color: #fff; cursor: crosshair;"></div>
+    </div>
+
+    <div class="tools-row" style="width: 100%; max-width: 324px; display: flex; justify-content: space-between; margin-bottom: 15px; gap: 8px;">
+        <button class="tool-btn active-tool" id="toolPencil" onclick="setTool('pencil')" style="flex:1; background:#ffd166; border:2.5px solid #000; border-radius:8px; font-weight:800; font-size:11px; padding:8px 4px; cursor:pointer; box-shadow:2px 2px 0px #000; font-family:'Cherry Bomb One',cursive;">✏️ Pencil</button>
+        <button class="tool-btn" id="toolEraser" onclick="setTool('eraser')" style="flex:1; background:#fff; border:2px solid #000; border-radius:8px; font-weight:800; font-size:11px; padding:8px 4px; cursor:pointer; box-shadow:2px 2px 0px #000; font-family:'Cherry Bomb One',cursive;">🧹 Eraser</button>
+        <button class="tool-btn" id="toolFill" onclick="setTool('fill')" style="flex:1; background:#fff; border:2px solid #000; border-radius:8px; font-weight:800; font-size:11px; padding:8px 4px; cursor:pointer; box-shadow:2px 2px 0px #000; font-family:'Cherry Bomb One',cursive;">🪣 Bucket</button>
+        <button class="tool-btn" onclick="undoAction()" style="flex:1; background:#fff; border:2px solid #000; border-radius:8px; font-weight:800; font-size:11px; padding:8px 4px; cursor:pointer; box-shadow:2px 2px 0px #000; font-family:'Cherry Bomb One',cursive;">↩️ Undo</button>
+    </div>
+
+    <canvas id="exportCanvas" width="32" height="32" style="display:none;"></canvas>
+
+    <div class="palette-container" style="width:100%; max-width:340px; background:#fff; border:3px solid #000; border-radius:14px; padding:12px; box-shadow:4px 4px 0px #000; display:flex; flex-direction:column; gap:8px;">
+        <div style="font-size:11px; font-weight:900; text-transform:uppercase;">Color Palette</div>
+        <div class="palette-grid" id="paletteGrid" style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; justify-items:center;"></div>
+    </div>
+
+    <!-- Load Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- Load Custom Dev World Engine -->
+    <script src="devworldeng.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const GRID_SIZE = 32;
+        const container = document.getElementById('pixelCanvasContainer');
+        let isDrawing = false;
+        let selectedColor = "#000000";
+        let currentTool = "pencil";
+        let historyStack = [];
+
+        const colorPalette = ["#000000", "#ffffff", "#8d99ae", "#2b2d42", "#ef476f", "#f77f00", "#ffd166", "#06d6a0", "#118ab2", "#073b4c", "#7209b7", "#f72585", "#b56576", "#e56b6f", "#355070", "#eaac8b"];
+        let pixelMatrix = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
+
+        function saveStateToHistory() {
+            historyStack.push(pixelMatrix.map(row => [...row]));
+            if (historyStack.length > 20) historyStack.shift();
+        }
+
+        function initPalette() {
+            const grid = document.getElementById('paletteGrid');
+            grid.innerHTML = '';
+            colorPalette.forEach((hex) => {
+                const swatch = document.createElement('div');
+                swatch.style.cssText = `width:36px; height:36px; border:2px solid #000; border-radius:8px; cursor:pointer; background:${hex}; box-shadow:2px 2px 0px #000;`;
+                if (hex === selectedColor) swatch.style.border = "3.5px solid #000";
+                swatch.addEventListener('click', () => {
+                    selectedColor = hex;
+                    initPalette();
+                });
+                grid.appendChild(swatch);
+            });
+        }
+
+        function setTool(toolName) {
+            currentTool = toolName;
+            ['toolPencil', 'toolEraser', 'toolFill'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.style.background = "#fff";
+                    el.style.borderWidth = "2px";
+                }
+            });
+            const activeId = toolName === 'pencil' ? 'toolPencil' : toolName === 'eraser' ? 'toolEraser' : 'toolFill';
+            const activeEl = document.getElementById(activeId);
+            if(activeEl) {
+                activeEl.style.background = "#ffd166";
+                activeEl.style.borderWidth = "2.5px";
+            }
+        }
+
+        function initGrid() {
+            container.innerHTML = '';
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const pixel = document.createElement('div');
+                    pixel.style.cssText = `background-color:${pixelMatrix[r][c]}; border:0.1px solid rgba(0,0,0,0.02);`;
+                    pixel.dataset.row = r; 
+                    pixel.dataset.col = c;
+                    
+                    pixel.addEventListener('mousedown', (e) => {
+                        isDrawing = true;
+                        saveStateToHistory();
+                        applyToolToPixel(r, c, pixel);
+                        e.preventDefault();
+                    });
+                    
+                    pixel.addEventListener('mouseenter', () => {
+                        if (isDrawing) {
+                            applyToolToPixel(r, c, pixel);
+                        }
+                    });
+
+                    pixel.addEventListener('touchstart', (e) => {
+                        isDrawing = true;
+                        saveStateToHistory();
+                        applyToolToPixel(r, c, pixel);
+                        e.preventDefault();
+                    }, { passive: false });
+
+                    container.appendChild(pixel);
+                }
+            }
+        }
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (target && target.dataset.row !== undefined) {
+                const tr = parseInt(target.dataset.row);
+                const tc = parseInt(target.dataset.col);
+                applyToolToPixel(tr, tc, target);
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('mouseup', () => { isDrawing = false; });
+        window.addEventListener('touchend', () => { isDrawing = false; });
+
+        function applyToolToPixel(r, c, pixelElement) {
+            if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) return;
+            const targetEl = pixelElement || container.children[r * GRID_SIZE + c];
+
+            if (currentTool === 'pencil') {
+                if (pixelMatrix[r][c] !== selectedColor) {
+                    pixelMatrix[r][c] = selectedColor;
+                    if (targetEl) targetEl.style.backgroundColor = selectedColor;
+                }
+            } else if (currentTool === 'eraser') {
+                if (pixelMatrix[r][c] !== '#ffffff') {
+                    pixelMatrix[r][c] = '#ffffff';
+                    if (targetEl) targetEl.style.backgroundColor = '#ffffff';
+                }
+            } else if (currentTool === 'fill') {
+                floodFill(r, c, pixelMatrix[r][c], selectedColor);
+                initGrid();
+                isDrawing = false;
+            }
+        }
+
+        function floodFill(startRow, startCol, targetColor, fillColor) {
+            if (targetColor === fillColor) return;
+            const queue = [[startRow, startCol]];
+            const visited = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(false));
+
+            while (queue.length > 0) {
+                const [r, c] = queue.shift();
+                if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) continue;
+                if (visited[r][c]) continue;
+                if (pixelMatrix[r][c] !== targetColor) continue;
+
+                pixelMatrix[r][c] = fillColor;
+                visited[r][c] = true;
+
+                queue.push([r + 1, c]);
+                queue.push([r - 1, c]);
+                queue.push([r, c + 1]);
+                queue.push([r, c - 1]);
+            }
+        }
+
+        function clearCanvas() {
+            saveStateToHistory();
+            pixelMatrix = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill('#ffffff'));
+            initGrid();
+        }
+
+        function undoAction() {
+            if (historyStack.length === 0) return;
+            pixelMatrix = historyStack.pop();
+            initGrid();
+        }
+
+        // Settings Menu Popup via devworldeng.js
+        function openSettingsModal() {
+            dev.createpopup({
+                title: "Canvas Settings",
+                message: "Canvas Grid: 32x32 pixels\nChoose item publishing types freely in the export menu!",
+                buttons: {
+                    "btn-close": {
+                        text: "Back to Canvas",
+                        color: "#ffd166",
+                        onClick: () => {}
+                    }
+                }
+            });
+        }
+
+        // Prompt user for metadata details and Free vs Paid selection before exporting files
+        function openPublishPrompt() {
+            dev.createpopup({
+                title: "Publish PFP Metadata",
+                inputs: {
+                    "pfp-name-input": { type: "text", placeholder: "PFP Title / Item Name" },
+                    "pfp-creator-input": { type: "text", placeholder: "Creator Name" }
+                },
+                footerHtml: `
+                    <div style="text-align: left; font-size: 11px; margin-bottom: 6px; font-family: 'Segoe UI', sans-serif; color: #333;">
+                        <b>Select Item Type:</b>
+                        <select id="pfp-type-select" class="select-field" style="margin-top: 4px; margin-bottom: 10px;">
+                            <option value="free">Free (Anyone can use it)</option>
+                            <option value="shop">Paid (Gets added to the shop)</option>
+                        </select>
+                    </div>
+                    <button class="btn-custom" style="background: #38b000; color: #fff; width: 100%;" onclick="processExportFromModal()">
+                        Download & Publish Guide
+                    </button>
+                `
+            });
+        }
+
+        function processExportFromModal() {
+            const nameInput = document.getElementById("pfp-name-input");
+            const creatorInput = document.getElementById("pfp-creator-input");
+            const typeSelect = document.getElementById("pfp-type-select");
+
+            const pfpName = nameInput ? nameInput.value.trim() || "Untitled PFP" : "Untitled PFP";
+            const creatorName = creatorInput ? creatorInput.value.trim() || "Anonymous Dev" : "Anonymous Dev";
+            const statusValue = typeSelect ? typeSelect.value : "free";
+
+            dev.closeAll();
+            exportProfileDrawing(pfpName, creatorName, statusValue);
+        }
+
+        function exportProfileDrawing(pfpName, creatorName, statusValue) {
+            const tempCanvas = document.getElementById('exportCanvas');
+            const ctx = tempCanvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            const imgData = ctx.createImageData(GRID_SIZE, GRID_SIZE);
+            
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const idx = (r * GRID_SIZE + c) * 4;
+                    const bigint = parseInt(pixelMatrix[r][c].replace("#", ""), 16);
+                    imgData.data[idx] = (bigint >> 16) & 255;
+                    imgData.data[idx + 1] = (bigint >> 8) & 255;
+                    imgData.data[idx + 2] = bigint & 255;
+                    imgData.data[idx + 3] = 255;
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            // Generate clean PNG blob
+            tempCanvas.toBlob((blob) => {
+                const pngUrl = URL.createObjectURL(blob);
+                
+                // Construct JSON metadata file
+                const metadata = {
+                    name: pfpName,
+                    type: "pfp",
+                    status: statusValue,
+                    price: statusValue === "shop" ? 100 : 0,
+                    creator: creatorName,
+                    createdAt: new Date().toISOString()
+                };
+
+                const jsonBlob = new Blob([JSON.stringify(metadata, null, 2)], { type: 'application/json' });
+                const jsonUrl = URL.createObjectURL(jsonBlob);
+
+                // Trigger downloads for both files needed for the PR
+                const safeFileName = pfpName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                triggerDownload(pngUrl, `${safeFileName}.png`);
+                triggerDownload(jsonUrl, `${safeFileName}.json`);
+
+                // Show GitHub Pull Request Publishing Guide modal
+                showPublishGuideModal();
+            }, 'image/png');
+        }
+
+        function triggerDownload(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function showPublishGuideModal() {
+            dev.createpopup({
+                title: "Publish Your PFP!",
+                message: "Your drawing (.png) & metadata (.json) have been downloaded. Follow these steps:",
+                footerHtml: `
+                    <div style="text-align: left; font-size: 11px; line-height: 1.4; margin-bottom: 12px; color: #333; font-family: 'Segoe UI', sans-serif;">
+                        1. Go to GitHub and open the <b>DevWorldWebRelease</b> repo.<br>
+                        2. Navigate to the <b>pfps/</b> folder.<br>
+                        3. Create a <b>Pull Request</b> uploading your files.<br>
+                        4. Wait for approval to see it live in Dev World!
+                    </div>
+                    <a href="https://github.com/ThatOneDeveloperDevWorld/DevWorldWebRelease" target="_blank" class="btn-custom" style="background: #4ea8de; color: #fff; text-align: center; display: block; text-decoration: none; padding: 8px; border-radius: 8px; border: 2px solid #000; box-shadow: 2px 2px 0px #000; font-family: 'Cherry Bomb One', cursive;">Open GitHub Repo</a>
+                `
+            });
+        }
+
+        initPalette();
+        initGrid();
+    </script>
+</body>
+</html>

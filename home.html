@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dev World - Home</title>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -19,7 +23,7 @@
             background-position: center;
             background-repeat: no-repeat;
             color: #212529;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -87,31 +91,30 @@
             border: 2px solid #000;
             border-radius: 8px;
             background: #f8f9fa;
-            font-weight: 600;
-            font-size: 13px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
         }
 
         .btn-search {
             padding: 10px 16px;
             border: 2px solid #000;
             border-radius: 8px;
-            font-weight: 800;
-            font-size: 13px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
             cursor: pointer;
             background: #ffb703;
             box-shadow: 2px 2px 0px #000;
         }
 
         .section-title {
-            font-size: 16px;
-            font-weight: 900;
+            font-size: 18px;
             text-transform: uppercase;
             margin: 5px 0 0 0;
             color: #000;
             background: #ffffff;
             border: 3px solid #000;
             display: inline-block;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 8px;
             box-shadow: 2px 2px 0px #000;
             align-self: flex-start;
@@ -120,85 +123,54 @@
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
+            gap: 15px;
             width: 100%;
         }
 
         .game-card-square {
-            aspect-ratio: 1 / 1;
-            background: #f8f9fa;
+            background: #ffffff;
             border: 2.5px solid #000;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 3px 3px 0px #000;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 10px;
+            padding: 8px;
             text-decoration: none;
             color: #000;
+            gap: 6px;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
 
         .game-card-square:hover {
             transform: translate(-1px, -1px);
             box-shadow: 4px 4px 0px #000;
-            background: #fff;
         }
 
-        .game-card-top {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+        .game-card-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border: 2px solid #000;
+            border-radius: 8px;
         }
 
         .game-card-title {
-            font-weight: 800;
-            font-size: 13px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .game-card-author {
-            font-size: 9px;
-            font-weight: 700;
-            color: #555;
+            font-size: 14px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-        }
-
-        .game-card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 9px;
-            font-weight: bold;
+            margin-top: 2px;
         }
 
         .visits-count {
-            color: #333;
-            background: #e9ecef;
-            padding: 2px 5px;
-            border-radius: 4px;
-            border: 1px solid #000;
-        }
-
-        .play-tag {
-            background: #55ff55;
-            border: 1.5px solid #000;
-            padding: 2px 6px;
-            border-radius: 4px;
-            box-shadow: 1.5px 1.5px 0px #000;
+            font-size: 12px;
+            color: #555;
         }
 
         .loading-text {
             grid-column: 1 / -1;
             text-align: center;
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 16px;
             color: #000;
             background: #fff;
             border: 3px solid #000;
@@ -207,49 +179,65 @@
             box-shadow: 3px 3px 0px #000;
         }
 
+        /* Fixed Bottom Navigation Bar */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
+            height: 80px;
             background-color: #ffffff;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 10px 0;
+            padding: 0 10px;
             box-shadow: 0 -4px 0px #000000;
             border-top: 3px solid #000000;
             z-index: 1000;
         }
 
         .nav-item {
-            background: #f8f9fa;
-            border: 2px solid #000;
-            border-radius: 8px;
-            color: #000;
-            font-family: inherit;
-            font-size: 12px;
-            font-weight: 800;
+            background: none;
+            border: none;
             cursor: pointer;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 2px;
-            padding: 6px 16px;
-            box-shadow: 2px 2px 0px #000;
+            justify-content: center;
+            padding: 0;
             text-decoration: none;
             transition: transform 0.1s ease;
         }
 
-        .nav-item:active {
-            transform: translate(1px, 1px);
-            box-shadow: 1px 1px 0px #000;
+        .nav-item img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
         }
 
-        .nav-wallet { background: #ffb703; }
-        .nav-create { background: #55ff55; }
-        .nav-profile { background: #48cae4; }
-        
+        .nav-create-item {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            position: relative;
+            bottom: 2.5px;
+            transition: transform 0.1s ease;
+        }
+
+        .nav-create-item img {
+            height: 68px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-item:active, .nav-create-item:active {
+            transform: scale(0.92);
+        }
+
+        /* Popup Modal Styles */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -279,14 +267,12 @@
         }
 
         .modal-title {
-            font-size: 18px;
-            font-weight: 900;
+            font-size: 20px;
             margin: 0;
         }
 
         .modal-text {
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 14px;
             color: #333;
             margin: 0;
             line-height: 1.4;
@@ -303,8 +289,8 @@
             padding: 10px;
             border: 2px solid #000;
             border-radius: 8px;
-            font-weight: 800;
-            font-size: 13px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 14px;
             cursor: pointer;
             box-shadow: 2px 2px 0px #000;
             transition: transform 0.1s ease;
@@ -339,20 +325,24 @@
             <div class="loading-text">Loading...</div>
         </div>
     </div>
+
+    <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-        <a href="wallet.html" class="nav-item nav-wallet">
-            <span>💰</span>
-            Wallet
+        <a href="wallet.html" class="nav-item">
+            <img src="wallet.png" alt="Wallet">
         </a>
-        <button type="button" class="nav-item nav-create" onclick="openCreateModal()">
-            <span>✏️</span>
-            Create
+        <a href="posts.html" class="nav-item">
+            <img src="posts.png" alt="Posts">
+        </a>
+        <button type="button" class="nav-create-item" onclick="openCreateModal()">
+            <img src="create.png" alt="Create">
         </button>
-        <a href="profile.html" class="nav-item nav-profile">
-            <span>👤</span>
-            Profile
+        <a href="profile.html" class="nav-item">
+            <img src="profile.png" alt="Profile">
         </a>
     </nav>
+
+    <!-- Create Confirmation Popup Modal -->
     <div class="modal-overlay" id="createModal">
         <div class="modal-box">
             <h3 class="modal-title">Create Game</h3>
@@ -379,34 +369,7 @@
         }
 
         const db = firebase.firestore();
-
-        const userCache = {};
-
-        async function getCreatorUsername(authorId) {
-            if (!authorId) return "Unknown";
-            if (userCache[authorId]) return userCache[authorId];
-
-            try {
-                let userDoc = await db.collection("users").doc(authorId).get();
-                if (userDoc.exists) {
-                    let uData = userDoc.data();
-                    let name = uData.Username || uData.username || "Unknown";
-                    userCache[authorId] = name;
-                    return name;
-                }
-
-                let qSnap = await db.collection("users").where("uid", "==", authorId).get();
-                if (!qSnap.empty) {
-                    let uData = qSnap.docs[0].data();
-                    let name = uData.Username || uData.username || "Unknown";
-                    userCache[authorId] = name;
-                    return name;
-                }
-            } catch (err) {
-                console.error("Error fetching creator name:", err);
-            }
-            return "Developer";
-        }
+        db.settings({ experimentalForceLongPolling: true });
 
         async function searchUser() {
             const queryName = document.getElementById('search-username-input').value.trim();
@@ -449,44 +412,27 @@
                 for (let doc of snapshot.docs) {
                     const game = doc.data();
                     const gameId = doc.id;
-                    const publisherId = game.authorId || game.creatorId;
-
-                    const creatorName = await getCreatorUsername(publisherId);
 
                     const card = document.createElement('a');
                     card.className = 'game-card-square';
                     card.href = `play.html?id=${gameId}`;
 
-                    const topDiv = document.createElement('div');
-                    topDiv.className = 'game-card-top';
+                    const img = document.createElement('img');
+                    img.src = 'gameres.png';
+                    img.alt = game.title || "Game Icon";
+                    img.className = 'game-card-img';
 
                     const titleDiv = document.createElement('div');
                     titleDiv.className = 'game-card-title';
                     titleDiv.innerText = game.title || "Untitled Level";
 
-                    const authorDiv = document.createElement('div');
-                    authorDiv.className = 'game-card-author';
-                    authorDiv.innerText = `by ${creatorName}`;
+                    const visitsDiv = document.createElement('div');
+                    visitsDiv.className = 'visits-count';
+                    visitsDiv.innerText = `${game.visits || 0} visits`;
 
-                    topDiv.appendChild(titleDiv);
-                    topDiv.appendChild(authorDiv);
-
-                    const footerDiv = document.createElement('div');
-                    footerDiv.className = 'game-card-footer';
-                    
-                    const visitsSpan = document.createElement('span');
-                    visitsSpan.className = 'visits-count';
-                    visitsSpan.innerText = `👁️ ${game.visits || 0}`;
-
-                    const playSpan = document.createElement('span');
-                    playSpan.className = 'play-tag';
-                    playSpan.innerText = 'Play ▶';
-
-                    footerDiv.appendChild(visitsSpan);
-                    footerDiv.appendChild(playSpan);
-
-                    card.appendChild(topDiv);
-                    card.appendChild(footerDiv);
+                    card.appendChild(img);
+                    card.appendChild(titleDiv);
+                    card.appendChild(visitsDiv);
                     container.appendChild(card);
                 }
             } catch (error) {

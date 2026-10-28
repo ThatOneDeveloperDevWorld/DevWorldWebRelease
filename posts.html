@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev World - Posts</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            background-color: #5ce1e6;
+            background-image: url('https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled338_20260812133205.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #212529;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 15px;
+            padding-bottom: 90px;
+        }
+
+        .clouds-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: url('https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled338_20260812133205.png');
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .fullscreen-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 14px;
+            box-shadow: 0 5px 0px #000000;
+            padding: 12px 18px;
+        }
+
+        .logo-img {
+            max-width: 120px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(2px 2px 0px #000);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: normal;
+            text-transform: uppercase;
+            margin: 5px 0 0 0;
+            color: #000;
+            background: #ffffff;
+            border: 3px solid #000;
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 0px #000;
+            align-self: flex-start;
+        }
+
+        /* "What's on your mind?" Trigger Button */
+        .woym-trigger-btn {
+            background: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 14px;
+            box-shadow: 0 5px 0px #000000;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            transition: transform 0.1s ease;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .woym-trigger-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0 3px 0px #000000;
+        }
+
+        .woym-icon-img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .woym-trigger-text {
+            font-size: 14px;
+            color: #555;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        /* Popup Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border: 3px solid #000;
+            border-radius: 14px;
+            box-shadow: 5px 5px 0px #000;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            text-align: center;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #f8f9fa;
+            font-size: 13px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .modal-footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-upload {
+            background: #55ff55;
+            color: #000;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            width: 100%;
+            text-align: center;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .btn-cancel {
+            background: #ff6b6b;
+            color: #fff;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .posts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .post-card {
+            background: #fff;
+            border: 2.5px solid #000;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0px #000;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post-author {
+            font-size: 13px;
+            color: #212529;
+        }
+
+        .post-text {
+            font-size: 14px;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .attached-game-card {
+            background: #f8f9fa;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: #000;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .game-ctrl-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        .play-tag {
+            background: #55ff55;
+            border: 1.5px solid #000;
+            padding: 3px 8px;
+            border-radius: 6px;
+            box-shadow: 1.5px 1.5px 0px #000;
+            font-size: 10px;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .like-btn, .report-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border: 2px solid #000;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .like-btn { background: #e9ecef; }
+        .report-btn { background: #ffcc00; color: #000; }
+        .report-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
+
+        .like-icon {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+
+        .comments-section {
+            margin-top: 5px;
+            border-top: 2px dashed #000;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .comment-item {
+            background: #f8f9fa;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 12px;
+            box-shadow: 1.5px 1.5px 0px #000;
+        }
+
+        .comment-input-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .loading-text {
+            text-align: center;
+            font-size: 14px;
+            color: #000;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 3px 3px 0px #000;
+        }
+
+        .load-more-btn {
+            background: #55ff55;
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 14px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.1s ease;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .load-more-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        /* Fixed Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            box-shadow: 0 -4px 0px #000000;
+            border-top: 3px solid #000000;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            text-decoration: none;
+            transition: transform 0.1s ease;
+        }
+
+        .nav-item img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-create-item {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            position: relative;
+            bottom: 2.5px;
+            transition: transform 0.1s ease;
+        }
+
+        .nav-create-item img {
+            height: 68px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-item:active, .nav-create-item:active {
+            transform: scale(0.92);
+        }
+    </style>
+</head>
+<body onload="initPostsPage()">
+
+    <div class="clouds-bg"></div>
+
+    <div class="fullscreen-container">
+        <div class="nav-row">
+            <img src="Devworldlogobeta.png" alt="Dev World" class="logo-img">
+        </div>
+
+        <!-- What's on your mind? Trigger Button -->
+        <button class="woym-trigger-btn" onclick="openCreatePostModal()">
+            <img src="woym.png" alt="WOYM" class="woym-icon-img">
+            <span class="woym-trigger-text" id="woym-button-label">What's on your mind?</span>
+        </button>
+
+        <h3 class="section-title">Posts</h3>
+        
+        <div class="posts-container" id="posts-container">
+            <div class="loading-text">Loading posts...</div>
+        </div>
+
+        <button id="load-more-btn" class="load-more-btn" style="display:none;" onclick="loadMorePosts()">Show More</button>
+    </div>
+
+    <!-- Create Post Popup Modal -->
+    <div class="modal-overlay" id="createPostModal">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 class="modal-title" style="margin:0;">Create Post</h3>
+                <button class="btn-cancel" onclick="closeCreatePostModal()">X</button>
+            </div>
+
+            <textarea id="post-input" class="input-field" maxlength="150" placeholder="your text here..." style="resize:none; height:90px;" oninput="updateCharCount()"></textarea>
+            
+            <div class="modal-footer-row">
+                <span id="char-count" style="font-size:12px; color:#333;">150/150</span>
+                <select id="attach-game-select" class="input-field" style="max-width:200px;">
+                    <option value="">game(optional)</option>
+                </select>
+            </div>
+
+            <button id="post-submit-btn" class="btn-upload" onclick="submitPost()">upload</button>
+        </div>
+    </div>
+
+    <!-- Report Post Modal -->
+    <div class="modal-overlay" id="reportPostModal">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 class="modal-title" style="margin:0;">Report Post</h3>
+                <button class="btn-cancel" onclick="closeReportModal()">X</button>
+            </div>
+            <p style="font-size:12px; margin:0;">Please select a reason for reporting this post:</p>
+            <select id="report-reason-select" class="input-field">
+                <option value="Inappropriate Content">Inappropriate Content</option>
+                <option value="Harassment or Bullying">Harassment or Bullying</option>
+                <option value="Spam">Spam</option>
+                <option value="Other">Other</option>
+            </select>
+            <textarea id="report-details-input" class="input-field" maxlength="100" placeholder="Optional details..." style="resize:none; height:60px;"></textarea>
+            <button class="btn-upload" style="background:#ffcc00;" onclick="submitReport()">Send Report</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <a href="wallet.html" class="nav-item">
+            <img src="wallet.png" alt="Wallet">
+        </a>
+        <a href="posts.html" class="nav-item">
+            <img src="posts.png" alt="Posts">
+        </a>
+        <button type="button" class="nav-create-item" onclick="openCreateGameModal()">
+            <img src="create.png" alt="Create">
+        </button>
+        <a href="profile.html" class="nav-item">
+            <img src="profile.png" alt="Profile">
+        </a>
+    </nav>
+
+    <!-- Create Game Confirmation Modal -->
+    <div class="modal-overlay" id="createGameModal">
+        <div class="modal-box" style="text-align:center;">
+            <h3 class="modal-title">Create Game</h3>
+            <p style="font-size:13px; color:#333; margin:0;">Create a new game? Once published, this game will be public to everyone on Dev world.</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+                <button class="btn-cancel" style="flex:1; padding:10px;" onclick="closeCreateGameModal()">Cancel</button>
+                <button class="btn-upload" style="flex:1; padding:10px;" onclick="confirmCreateGame()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+        db.settings({ experimentalForceLongPolling: true });
+
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1564837603876802641/5K3oOcnpXYPxOdqi_wTv3jLxnSiABSAPbg1dJYzfM-6bYKs31X3DXhqAAPRGvAXIZey9";
+
+        const userCache = {};
+        let activeAuthUser = null;
+        let lastVisibleDoc = null;
+        let isInitialLoad = true;
+        let currentReportingPost = null;
+
+        async function getCreatorUsername(authorId) {
+            if (!authorId) return "Unknown";
+            if (userCache[authorId]) return userCache[authorId];
+
+            try {
+                let userDoc = await db.collection("users").doc(authorId).get();
+                if (userDoc.exists) {
+                    let uData = userDoc.data();
+                    let name = uData.Username || uData.username || "Unknown";
+                    userCache[authorId] = name;
+                    return name;
+                }
+
+                let qSnap = await db.collection("users").where("uid", "==", authorId).get();
+                if (!qSnap.empty) {
+                    let uData = qSnap.docs[0].data();
+                    let name = uData.Username || uData.username || "Unknown";
+                    userCache[authorId] = name;
+                    return name;
+                }
+            } catch (err) {
+                console.error("Error fetching creator name:", err);
+            }
+            return "Developer";
+        }
+
+        function updateCharCount() {
+            const input = document.getElementById('post-input');
+            const counter = document.getElementById('char-count');
+            const remaining = 150 - input.value.length;
+            counter.innerText = `${remaining}/150`;
+        }
+
+        function openCreatePostModal() {
+            if (!activeAuthUser) {
+                alert("Please log in first to create a post.");
+                return;
+            }
+            document.getElementById('createPostModal').style.display = 'flex';
+        }
+
+        function closeCreatePostModal() {
+            document.getElementById('createPostModal').style.display = 'none';
+        }
+
+        function openReportModal(postId, postText, creatorId, authorName) {
+            currentReportingPost = { postId, postText, creatorId, authorName };
+            document.getElementById('reportPostModal').style.display = 'flex';
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportPostModal').style.display = 'none';
+            currentReportingPost = null;
+        }
+
+        async function submitReport() {
+            if (!currentReportingPost) return;
+
+            const reason = document.getElementById('report-reason-select').value;
+            const details = document.getElementById('report-details-input').value.trim();
+            
+            let reporterUsername = "Anonymous";
+            if (activeAuthUser) {
+                reporterUsername = await getCreatorUsername(activeAuthUser.uid);
+            }
+
+            const reportMessage = `${reason}: ${currentReportingPost.postText} (Details: ${details || "None"})`;
+            
+            const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            const reportLink = `${baseUrl}reportedpost.html?reporter=${encodeURIComponent(reporterUsername)}&reportmsg=${encodeURIComponent(reportMessage)}&postid=${encodeURIComponent(currentReportingPost.postId)}&creatorid=${encodeURIComponent(currentReportingPost.creatorId)}`;
+
+            const discordPayload = {
+                content: `🚨 **New Post Report!**\n` +
+                         `• **Reporter:** ${reporterUsername}\n` +
+                         `• **Post ID:** \`${currentReportingPost.postId}\`\n` +
+                         `• **Creator ID:** \`${currentReportingPost.creatorId}\`\n` +
+                         `• **Review Link:** ${reportLink}`
+            };
+
+            try {
+                const response = await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(discordPayload)
+                });
+
+                if (response.ok || response.status === 204) {
+                    alert("Post reported successfully. Thank you!");
+                } else {
+                    alert("Report sent, but webhook returned an error status.");
+                }
+            } catch (err) {
+                console.error("Failed to send webhook report:", err);
+                alert("Error sending report to server.");
+            }
+
+            closeReportModal();
+        }
+
+        function openCreateGameModal() {
+            document.getElementById('createGameModal').style.display = 'flex';
+        }
+
+        function closeCreateGameModal() {
+            document.getElementById('createGameModal').style.display = 'none';
+        }
+
+        function confirmCreateGame() {
+            window.location.href = 'editor.html';
+        }
+
+        async function initPostsPage() {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                activeAuthUser = user;
+                const postBtn = document.getElementById('post-submit-btn');
+                const triggerLabel = document.getElementById('woym-button-label');
+                
+                if (user) {
+                    postBtn.innerText = "upload";
+                    triggerLabel.innerText = "What's on your mind?";
+                    loadUserGamesForDropdown(user.uid);
+                } else {
+                    postBtn.innerText = "Log In Required";
+                    triggerLabel.innerText = "Log in to post...";
+                }
+                resetAndLoadPosts();
+            });
+        }
+
+        async function loadUserGamesForDropdown(userId) {
+            const select = document.getElementById('attach-game-select');
+            select.innerHTML = '<option value="">game(optional)</option>';
+            try {
+                const snapshot = await db.collection("games").where("authorId", "==", userId).get();
+                snapshot.forEach(doc => {
+                    const game = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.innerText = game.title || "Untitled Game";
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                console.error("Error loading user games:", err);
+            }
+        }
+
+        async function submitPost() {
+            try {
+                if (!activeAuthUser) {
+                    alert("You must be logged in to post.");
+                    return;
+                }
+
+                const textInput = document.getElementById('post-input');
+                const text = textInput.value.trim();
+                const gameId = document.getElementById('attach-game-select').value;
+
+                if (!text) {
+                    alert("Post cannot be empty.");
+                    return;
+                }
+
+                if (text.length > 150) {
+                    alert("Post exceeds the 150-character limit.");
+                    return;
+                }
+
+                await db.collection("posts").add({
+                    authorId: activeAuthUser.uid,
+                    text: text,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    likes: [],
+                    gameId: gameId || null
+                });
+
+                textInput.value = '';
+                document.getElementById('attach-game-select').value = '';
+                updateCharCount();
+                closeCreatePostModal();
+                resetAndLoadPosts();
+            } catch (err) {
+                console.error("Error submitting post:", err);
+                alert("Failed to post: " + err.message);
+            }
+        }
+
+        async function toggleLike(postId) {
+            if (!activeAuthUser) {
+                alert("Log in to like posts.");
+                return;
+            }
+
+            const postRef = db.collection("posts").doc(postId);
+            try {
+                await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(postRef);
+                    if (!doc.exists) return;
+
+                    let likes = doc.data().likes || [];
+                    if (likes.includes(activeAuthUser.uid)) {
+                        likes = likes.filter(id => id !== activeAuthUser.uid);
+                    } else {
+                        likes.push(activeAuthUser.uid);
+                    }
+                    transaction.update(postRef, { likes: likes });
+                });
+                refreshSinglePostUI(postId);
+            } catch (err) {
+                console.error("Error updating like:", err);
+            }
+        }
+
+        async function refreshSinglePostUI(postId) {
+            try {
+                const docSnap = await db.collection("posts").doc(postId).get();
+                if (!docSnap.exists) return;
+                const post = docSnap.data();
+                const likesCount = (post.likes || []).length;
+                const hasLiked = activeAuthUser && (post.likes || []).includes(activeAuthUser.uid);
+
+                const likeBtn = document.getElementById(`like-btn-${postId}`);
+                if (likeBtn) {
+                    likeBtn.style.background = hasLiked ? '#ff6b6b' : '#e9ecef';
+                    likeBtn.style.color = hasLiked ? '#fff' : '#000';
+                    likeBtn.innerHTML = `<img src="like.png" alt="Like" class="like-icon"> ${likesCount}`;
+                }
+            } catch (err) {
+                console.error("Error refreshing post UI:", err);
+            }
+        }
+
+        async function submitComment(postId) {
+            if (!activeAuthUser) {
+                alert("You must be logged in to comment.");
+                return;
+            }
+
+            const commentInput = document.getElementById(`comment-input-${postId}`);
+            if (!commentInput) return;
+
+            const commentText = commentInput.value.trim();
+            if (!commentText) return;
+
+            try {
+                await db.collection("posts").doc(postId).collection("comments").add({
+                    authorId: activeAuthUser.uid,
+                    text: commentText,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                commentInput.value = '';
+                refreshCommentsUI(postId);
+            } catch (err) {
+                console.error("Error adding comment:", err);
+                alert("Failed to post comment: " + err.message);
+            }
+        }
+
+        async function refreshCommentsUI(postId) {
+            const listContainer = document.getElementById(`comments-list-${postId}`);
+            if (!listContainer) return;
+
+            try {
+                const commentSnap = await db.collection("posts").doc(postId).collection("comments").orderBy("createdAt", "asc").get();
+                listContainer.innerHTML = '';
+                if (!commentSnap.empty) {
+                    for (let cDoc of commentSnap.docs) {
+                        const cData = cDoc.data();
+                        const cAuthorName = await getCreatorUsername(cData.authorId);
+                        const commentItem = document.createElement('div');
+                        commentItem.className = 'comment-item';
+                        commentItem.innerHTML = `<strong>@${cAuthorName}:</strong> ${cData.text}`;
+                        listContainer.appendChild(commentItem);
+                    }
+                }
+            } catch (commentErr) {
+                console.error("Error refreshing comments:", commentErr);
+            }
+        }
+
+        function resetAndLoadPosts() {
+            lastVisibleDoc = null;
+            isInitialLoad = true;
+            document.getElementById('posts-container').innerHTML = '<div class="loading-text">Loading posts...</div>';
+            document.getElementById('load-more-btn').style.display = 'none';
+            fetchPostsChunk(5);
+        }
+
+        function loadMorePosts() {
+            const loadBtn = document.getElementById('load-more-btn');
+            loadBtn.disabled = true;
+            loadBtn.innerText = 'Loading...';
+            fetchPostsChunk(2);
+        }
+
+        async function fetchPostsChunk(limitAmount) {
+            const container = document.getElementById('posts-container');
+            const loadBtn = document.getElementById('load-more-btn');
+
+            try {
+                let query = db.collection("posts").orderBy("createdAt", "desc");
+                if (lastVisibleDoc) {
+                    query = query.startAfter(lastVisibleDoc);
+                }
+                query = query.limit(limitAmount);
+
+                const snapshot = await query.get();
+
+                if (isInitialLoad) {
+                    container.innerHTML = '';
+                    isInitialLoad = false;
+                }
+
+                if (snapshot.empty) {
+                    if (!lastVisibleDoc) {
+                        container.innerHTML = '<div class="loading-text">No posts yet. Be the first to share something!</div>';
+                    }
+                    loadBtn.style.display = 'none';
+                    return;
+                }
+
+                lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+
+                for (let docSnap of snapshot.docs) {
+                    const post = docSnap.data();
+                    const postId = docSnap.id;
+                    const authorName = await getCreatorUsername(post.authorId);
+                    const likesCount = (post.likes || []).length;
+                    const hasLiked = activeAuthUser && (post.likes || []).includes(activeAuthUser.uid);
+
+                    const postCard = document.createElement('div');
+                    postCard.className = 'post-card';
+                    postCard.id = `post-card-${postId}`;
+
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'post-header';
+                    headerDiv.innerHTML = `<span class="post-author">@${authorName}</span>`;
+                    postCard.appendChild(headerDiv);
+
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'post-text';
+                    textDiv.innerText = post.text;
+                    postCard.appendChild(textDiv);
+
+                    if (post.gameId) {
+                        try {
+                            const gameSnap = await db.collection("games").doc(post.gameId).get();
+                            if (gameSnap.exists) {
+                                const gameData = gameSnap.data();
+                                const gameCard = document.createElement('a');
+                                gameCard.href = `play.html?id=${post.gameId}`;
+                                gameCard.className = 'attached-game-card';
+                                gameCard.innerHTML = `<span style="font-size:12px; display:flex; align-items:center;"><img src="gamectrl.png" alt="Game" class="game-ctrl-icon">${gameData.title || "Game"}</span><span class="play-tag">Play ▶</span>`;
+                                postCard.appendChild(gameCard);
+                            }
+                        } catch (e) {
+                            console.error("Error loading attached game:", e);
+                        }
+                    }
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'post-actions';
+                    
+                    const likeBtn = document.createElement('button');
+                    likeBtn.className = 'like-btn';
+                    likeBtn.id = `like-btn-${postId}`;
+                    likeBtn.style.background = hasLiked ? '#ff6b6b' : '#e9ecef';
+                    likeBtn.style.color = hasLiked ? '#fff' : '#000';
+                    likeBtn.innerHTML = `<img src="like.png" alt="Like" class="like-icon"> ${likesCount}`;
+                    likeBtn.onclick = () => toggleLike(postId);
+
+                    const reportBtn = document.createElement('button');
+                    reportBtn.className = 'report-btn';
+                    reportBtn.innerText = 'Report';
+                    reportBtn.onclick = () => openReportModal(postId, post.text, post.authorId, authorName);
+
+                    actionsDiv.appendChild(likeBtn);
+                    actionsDiv.appendChild(reportBtn);
+                    postCard.appendChild(actionsDiv);
+
+                    const commentsSection = document.createElement('div');
+                    commentsSection.className = 'comments-section';
+
+                    const commentsListDiv = document.createElement('div');
+                    commentsListDiv.id = `comments-list-${postId}`;
+                    commentsListDiv.style.display = 'flex';
+                    commentsListDiv.style.flexDirection = 'column';
+                    commentsListDiv.style.gap = '8px';
+
+                    try {
+                        const commentSnap = await db.collection("posts").doc(postId).collection("comments").orderBy("createdAt", "asc").get();
+                        if (!commentSnap.empty) {
+                            for (let cDoc of commentSnap.docs) {
+                                const cData = cDoc.data();
+                                const cAuthorName = await getCreatorUsername(cData.authorId);
+                                const commentItem = document.createElement('div');
+                                commentItem.className = 'comment-item';
+                                commentItem.innerHTML = `<strong>@${cAuthorName}:</strong> ${cData.text}`;
+                                commentsListDiv.appendChild(commentItem);
+                            }
+                        }
+                    } catch (commentErr) {
+                        console.error("Error loading comments:", commentErr);
+                    }
+
+                    commentsSection.appendChild(commentsListDiv);
+
+                    const commentInputRow = document.createElement('div');
+                    commentInputRow.className = 'comment-input-row';
+                    commentInputRow.innerHTML = `
+                        <input type="text" id="comment-input-${postId}" class="input-field" placeholder="Write a comment..." style="padding:6px 10px; font-size:12px;">
+                        <button onclick="submitComment('${postId}')" style="padding:6px 12px; border:2px solid #000; border-radius:8px; font-size:12px; cursor:pointer; background:#5ec8ff; color:#000; box-shadow:2px 2px 0px #000; font-family:'Cherry Bomb One', cursive, sans-serif;">Reply</button>
+                    `;
+                    commentsSection.appendChild(commentInputRow);
+                    postCard.appendChild(commentsSection);
+
+                    container.appendChild(postCard);
+                }
+
+                if (snapshot.docs.length < limitAmount) {
+                    loadBtn.style.display = 'none';
+                } else {
+                    loadBtn.style.display = 'block';
+                    loadBtn.disabled = false;
+                    loadBtn.innerText = 'Show More';
+                }
+
+            } catch (err) {
+                console.error("Error loading posts:", err);
+                if (isInitialLoad) {
+                    container.innerHTML = '<div class="loading-text" style="color:red;">Failed to load posts feed.</div>';
+                }
+                loadBtn.disabled = false;
+                loadBtn.innerText = 'Show More';
+            }
+        }
+    </script>
+</body>
+</html>
