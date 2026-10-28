@@ -169,9 +169,10 @@
         const db = firebase.firestore();
         db.settings({ experimentalForceLongPolling: true });
 
+        // Set Auth Persistence to LOCAL so login session persists across tab closes and domain reloads
         firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
             .catch((error) => {
-                console.warn("Auth persistence error (file:// fallback active):", error.message);
+                console.warn("Auth persistence error:", error.message);
             });
 
         // Helper function to handle user redirection based on ban status
@@ -188,26 +189,27 @@
             });
         }
 
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                handleUserRedirect(user);
-            }
-        });
-
         // 1. Initial Start Button Menu Popup via Engine
         document.getElementById('open-start-btn').addEventListener('click', () => {
+            // If user is already logged in, go straight to profile when clicking START
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser) {
+                handleUserRedirect(currentUser);
+                return;
+            }
+
             dev.createpopup({
                 title: "Welcome to Dev World",
                 buttons: {
                     "btn-create": {
                         text: "Create Account",
-                        color: "#5ce1e6", // Light cyan for Create Account
+                        color: "#5ce1e6",
                         textColor: "#000000",
                         onClick: () => openSignupPopup()
                     },
                     "btn-login": {
                         text: "Login",
-                        color: "#5ce1e6", // Light cyan for Login
+                        color: "#5ce1e6",
                         textColor: "#000000",
                         onClick: () => openLoginPopup()
                     }
@@ -227,7 +229,7 @@
                 buttons: {
                     "btn-signup": {
                         text: "Sign Up",
-                        color: "#38b000", // Left original green for form submit
+                        color: "#38b000",
                         textColor: "#fff",
                         onClick: () => {
                             const username = document.getElementById("signup-username").value.trim();
@@ -284,7 +286,7 @@
                 buttons: {
                     "btn-login": {
                         text: "Login",
-                        color: "#38b000", // Left original green for form submit
+                        color: "#38b000",
                         textColor: "#fff",
                         onClick: () => {
                             const email = document.getElementById("login-email").value.trim();
