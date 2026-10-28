@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - Dev World</title>
+    <title>Dev World v0.2.0</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
@@ -13,470 +14,143 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
-        * { box-sizing: border-box; }
-        body {
-            background-color: #5ce1e6;
-            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: #212529;
-            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        * { box-sizing: border-box; user-select: none; }
+        body, html {
+            width: 100%;
+            height: 100vh;
             margin: 0;
+            padding: 0;
+            background-color: #87f2b7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .mobile-app-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            background-color: #87f2b7;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            justify-content: space-between;
+            overflow-y: auto;
+            border: none;
+            box-shadow: none;
             padding: 20px 10px;
-            padding-bottom: 60px;
-            overflow-x: hidden;
         }
 
         .clouds-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 200%;
-            height: 200%;
-            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
-            background-repeat: repeat-x;
-            background-size: contain;
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .top-nav-bar {
-            position: relative;
-            z-index: 3;
-            width: 100%;
-            max-width: 850px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .menu-btn {
-            background: #ffffff;
-            border: 2px solid #000000;
-            border-radius: 10px;
-            padding: 8px 16px;
-            font-family: 'Cherry Bomb One', cursive, sans-serif;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 2px 2px 0px #000000;
-            transition: transform 0.1s ease;
-        }
-
-        .menu-btn:active {
-            transform: translate(1px, 1px);
-            box-shadow: 1px 1px 0px #000000;
-        }
-
-        .main-container {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 850px;
-            background: #ffffff;
-            border: 4px solid #000000;
-            border-radius: 20px;
-            box-shadow: 0 8px 0px #000000;
-            padding: 30px 15px;
-            text-align: left;
-        }
-
-        .logo-img {
-            max-width: 160px;
-            width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto 15px auto;
-            filter: drop-shadow(3px 3px 0px #000);
-        }
-
-        .header-title {
-            text-align: center;
-            font-size: 22px;
-            margin: 0 0 5px 0;
-        }
-
-        .uid-badge {
-            text-align: center;
-            font-size: 11px;
-            font-family: monospace;
-            background: #e9ecef;
-            border: 1px dashed #000;
-            padding: 4px 8px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            word-break: break-all;
-        }
-
-        .social-stats {
-            display: flex;
-            justify-content: space-around;
-            background: #f8f9fa;
-            border: 2px solid #000;
-            border-radius: 10px;
-            padding: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            text-align: center;
-            box-shadow: 2px 2px 0px #000;
-        }
-
-        .stat-box {
-            cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 10px;
-            transition: background 0.1s ease;
-        }
-
-        .stat-box:hover {
-            background: #e2e6ea;
-        }
-
-        .social-stats span {
-            font-size: 12px;
-            color: #555;
-            display: block;
-        }
-
-        .label-title {
-            font-size: 13px;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #000;
-            border-radius: 10px;
-            background: #f8f9fa;
-            margin-bottom: 12px;
-            font-size: 14px;
-            font-family: 'Cherry Bomb One', cursive, sans-serif;
-            outline: none;
-        }
-
-        .btn-custom {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #000;
-            border-radius: 10px;
-            font-size: 15px;
-            cursor: pointer;
-            box-shadow: 3px 3px 0px #000;
-            transition: transform 0.1s ease;
-            margin-bottom: 12px;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            font-family: 'Cherry Bomb One', cursive, sans-serif;
-        }
-
-        .btn-custom:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px #000;
-        }
-
-        .btn-save { background: #a1ffe4; color: #000; }
-        .btn-logout { background: #a1ffe4; color: #000; margin-bottom: 0; }
-        .btn-delete { background: #ff595e; color: #fff; margin-top: 0; margin-bottom: 0; }
-
-        .content-split-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 25px;
-            border-top: 3px dashed #000;
-            padding-top: 20px;
-            width: 100%;
-        }
-
-        @media (max-width: 768px) {
-            .content-split-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .section-column-title {
-            font-size: 16px;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            background: #ffffff;
-            border: 2px solid #000;
-            padding: 6px 10px;
-            border-radius: 10px;
-            box-shadow: 2px 2px 0px #000;
-            display: inline-block;
-        }
-
-        .item-list-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .content-card {
-            background: #ffffff;
-            border: 2px solid #000;
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: 2px 2px 0px #000;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 100%;
-        }
-
-        .inline-card-icon {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            vertical-align: middle;
-            margin-right: 6px;
-            display: inline-block;
-        }
-
-        .card-title {
-            font-size: 14px;
-            color: #000;
-            text-decoration: none;
-            word-break: break-word;
-            display: flex;
-            align-items: center;
-        }
-
-        .card-meta {
-            font-size: 11px;
-            color: #555;
-        }
-
-        .btn-item-delete {
-            background: #ff595e;
-            color: #fff;
-            border: 1.5px solid #000;
-            border-radius: 10px;
-            padding: 4px 8px;
-            font-size: 11px;
-            cursor: pointer;
-            box-shadow: 1.5px 1.5px 0px #000;
-            align-self: flex-start;
-            font-family: 'Cherry Bomb One', cursive, sans-serif;
-        }
-
-        .btn-show-next {
-            background: #e9ecef;
-            color: #000;
-            border: 2px solid #000;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 13px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            box-shadow: 2px 2px 0px #000;
-            font-family: 'Cherry Bomb One', cursive, sans-serif;
-        }
-
-        .modal-overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            opacity: 0;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-repeat: repeat;
+            background-size: 400px;
+            opacity: 0.3;
             pointer-events: none;
-            transition: opacity 0.2s ease;
+            z-index: 1;
         }
 
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
+        .top-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 4vh;
         }
 
-        .modal-content {
-            background: #ffffff;
+        .logo-img {
+            max-width: 220px;
+            width: 80%;
+            height: auto;
+            margin-bottom: 5px;
+            filter: drop-shadow(3px 3px 0px #000);
+        }
+
+        .version-text {
+            font-size: 15px;
+            letter-spacing: 1px;
+            color: #000;
+        }
+
+        .center-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2vh;
+        }
+
+        .btn-start {
+            width: 100%;
+            max-width: 260px;
+            padding: 12px;
+            background: #cceecc;
+            color: #000000;
             border: 4px solid #000000;
             border-radius: 20px;
-            box-shadow: 0 8px 0px #000000;
-            width: 90%;
-            max-width: 380px;
-            padding: 30px 20px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            font-size: 22px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #000000;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
             text-align: center;
         }
 
-        .user-list-popup {
+        .btn-start:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0px #000000;
+        }
+
+        .footer-scene {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 400px;
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 250px;
-            overflow-y: auto;
-            margin: 15px 0;
-            text-align: left;
+            justify-content: center;
+            margin-bottom: 1vh;
         }
 
-        .user-popup-item {
-            display: flex;
-            align-items: center;
-            background: #f8f9fa;
-            border: 2px solid #000;
-            padding: 8px 12px;
-            border-radius: 10px;
-            color: #000;
-            text-decoration: none;
-            font-size: 14px;
-            box-shadow: 2px 2px 0px #000;
-        }
-
-        .user-popup-item:hover {
-            background: #e9ecef;
-        }
-
-        .popup-menu-dropdown {
-            position: absolute;
-            top: 55px;
-            left: 0;
-            background: #ffffff;
-            border: 3px solid #000000;
-            border-radius: 14px;
-            box-shadow: 4px 4px 0px #000000;
-            width: 180px;
-            display: none;
-            flex-direction: column;
-            padding: 8px;
-            z-index: 20;
-        }
-
-        .popup-menu-dropdown.active {
-            display: flex;
-        }
-
-        .popup-menu-item {
-            background: #f8f9fa;
-            border: 2px solid #000;
-            text-align: left;
-            padding: 10px;
-            font-size: 13px;
-            font-family: 'Cherry Bomb One', cursive, sans-serif;
-            border-radius: 10px;
-            cursor: pointer;
-            color: #000;
-            margin-bottom: 6px;
-            box-shadow: 2px 2px 0px #000;
-            transition: background 0.1s;
-        }
-
-        .popup-menu-item:hover {
-            background: #e2e6ea;
+        .footer-img {
+            width: 85%;
+            height: auto;
+            image-rendering: pixelated;
         }
     </style>
 </head>
 <body>
 
-    <div class="clouds-bg"></div>
+    <div class="mobile-app-container">
+        <div class="clouds-bg"></div>
 
-    <div class="top-nav-bar">
-        <div style="position: relative;">
-            <button class="menu-btn" onclick="togglePopupMenu()">Menu</button>
-            <div id="popup-menu" class="popup-menu-dropdown">
-                <button class="popup-menu-item" onclick="openEditProfilePopup()">Edit Profile</button>
-                <button class="popup-menu-item" onclick="openWallet()">Wallet</button>
-                <button class="popup-menu-item" onclick="openSettingsPopup()">Settings</button>
-            </div>
-        </div>
-        <button class="menu-btn" onclick="window.location.href='home.html'">Home</button>
-    </div>
-
-    <div class="main-container">
-        <img src="Devworldlogobeta.png" alt="Dev World Logo" class="logo-img" onerror="this.src='https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/logo1.png?raw=true'">
-        
-        <h3 id="welcome-user" class="header-title">Loading...</h3>
-        <div id="uid-display" class="uid-badge">ID: Loading...</div>
-        
-        <div class="social-stats">
-            <div class="stat-box" onclick="openFollowersModal()">
-                <div id="followers-count">0</div><span>Followers</span>
-            </div>
-            <div class="stat-box" onclick="openFollowingModal()">
-                <div id="following-count">0</div><span>Following</span>
-            </div>
+        <div class="top-container">
+            <img src="https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/logo1.png?raw=true" alt="Dev World Logo" class="logo-img" onerror="this.src='Devworldlogobeta.png'">
+            <div class="version-text">v0.2.0</div>
         </div>
 
-        <div class="content-split-grid">
-            <div>
-                <div class="section-column-title">Games By Me</div>
-                <div id="my-games-list" class="item-list-container">
-                    <div style="font-size:13px;">Loading games...</div>
-                </div>
-                <button id="show-next-games-btn" class="btn-show-next" style="display: none;" onclick="showNextGames()">Show More</button>
-            </div>
-            <div>
-                <div class="section-column-title">Posts By Me</div>
-                <div id="my-posts-list" class="item-list-container">
-                    <div style="font-size:13px;">Loading posts...</div>
-                </div>
-            </div>
+        <div class="center-container">
+            <button id="open-start-btn" class="btn-start">START!</button>
+        </div>
+
+        <div class="footer-scene">
+            <img src="https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/screenlogin1.png?raw=true" alt="Characters and Scenery" class="footer-img">
         </div>
     </div>
 
-    <!-- Edit Profile Modal -->
-    <div id="edit-profile-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="margin-top: 0; font-size: 20px;">Edit Profile</h3>
-            <label class="label-title" style="text-align: left;">USERNAME</label>
-            <input type="text" id="username-input" class="input-field" placeholder="Username">
-            
-            <label class="label-title" style="text-align: left;">BIO</label>
-            <textarea id="bio-input" class="input-field" rows="3" placeholder="Tell us about yourself..."></textarea>
-            
-            <button id="save-btn" class="btn-custom btn-save">Save Profile</button>
-            <button class="btn-custom" style="background: #e9ecef; color: #000; margin-bottom: 0;" onclick="closeEditProfileModal()">Close</button>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="margin-top: 0; font-size: 20px;">Settings</h3>
-            <button id="logout-btn" class="btn-custom btn-logout" style="margin-bottom: 12px;">Log Out</button>
-            <button id="delete-account-btn" class="btn-custom btn-delete">Delete Account</button>
-            <button class="btn-custom" style="background: #e9ecef; color: #000; margin-top: 12px; margin-bottom: 0;" onclick="closeSettingsModal()">Close</button>
-        </div>
-    </div>
-
-    <!-- Followers / Following List Modal -->
-    <div id="social-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 id="social-modal-title" style="margin-top: 0; font-size: 18px;">Users</h3>
-            <div id="social-user-list" class="user-list-popup">
-                <div style="font-size: 13px; color: #555; text-align: center;">Loading...</div>
-            </div>
-            <button class="btn-custom" style="background: #e9ecef; color: #000; margin-bottom: 0;" onclick="closeSocialModal()">Close</button>
-        </div>
-    </div>
-
-    <!-- Delete Account Confirmation Modal -->
-    <div id="delete-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="margin-top: 0; color: #ff595e; font-size: 20px;">DELETE ACCOUNT?</h3>
-            <p style="font-size: 13px; color: #333; margin-bottom: 20px; font-weight: 600;">
-                Warning: This action is permanent and <strong>cannot be reversed</strong>. All your data will be wiped out completely.
-            </p>
-            <button id="confirm-delete-btn" class="btn-custom" style="background: #ff595e; color: #fff; margin-bottom: 10px;">Yes, Delete My Account</button>
-            <button id="cancel-delete-btn" class="btn-custom" style="background: #e9ecef; color: #000; margin-bottom: 0;">Cancel</button>
-        </div>
-    </div>
+    <!-- Load the custom Dev World Engine -->
+    <script src="devworldeng.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -495,314 +169,206 @@
         const db = firebase.firestore();
         db.settings({ experimentalForceLongPolling: true });
 
-        // Set persistence to LOCAL so users stay logged in across browser restarts
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+        // Set Auth Persistence to LOCAL so login session persists across tab closes and domain reloads
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .catch((error) => {
+                console.warn("Auth persistence error:", error.message);
+            });
 
-        let currentUserData = null;
-        
-        let cachedGames = [];
-        let cachedPosts = [];
-        let currentGameIndex = 0;
-        const PAGE_SIZE = 3;
-
-        function togglePopupMenu() {
-            const menu = document.getElementById("popup-menu");
-            menu.classList.toggle("active");
+        // Helper function to handle user redirection based on ban status
+        function handleUserRedirect(user) {
+            db.collection("users").doc(user.uid).get().then((doc) => {
+                if (doc.exists && doc.data().isBanned === true) {
+                    window.location.href = "ban.html";
+                } else {
+                    window.location.href = "profile.html";
+                }
+            }).catch((error) => {
+                console.error("Error checking user status:", error);
+                window.location.href = "profile.html";
+            });
         }
 
-        function openEditProfilePopup() {
-            togglePopupMenu();
-            document.getElementById("edit-profile-modal").classList.add("active");
-        }
+        // 1. Initial Start Button Menu Popup via Engine
+        document.getElementById('open-start-btn').addEventListener('click', () => {
+            // If user is already logged in, go straight to profile when clicking START
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser) {
+                handleUserRedirect(currentUser);
+                return;
+            }
 
-        function closeEditProfileModal() {
-            document.getElementById("edit-profile-modal").classList.remove("active");
-        }
+            dev.createpopup({
+                title: "Welcome to Dev World",
+                buttons: {
+                    "btn-create": {
+                        text: "Create Account",
+                        color: "#5ce1e6",
+                        textColor: "#000000",
+                        onClick: () => openSignupPopup()
+                    },
+                    "btn-login": {
+                        text: "Login",
+                        color: "#5ce1e6",
+                        textColor: "#000000",
+                        onClick: () => openLoginPopup()
+                    }
+                }
+            });
+        });
 
-        function openWallet() {
-            window.location.href = "wallet.html";
-        }
+        // 2. Signup Popup generated via engine configuration
+        function openSignupPopup() {
+            dev.createpopup({
+                title: "Create Account",
+                inputs: {
+                    "signup-username": { type: "text", placeholder: "Username" },
+                    "signup-email": { type: "email", placeholder: "Email address" },
+                    "signup-pass": { type: "password", placeholder: "Password" }
+                },
+                buttons: {
+                    "btn-signup": {
+                        text: "Sign Up",
+                        color: "#38b000",
+                        textColor: "#fff",
+                        onClick: () => {
+                            const username = document.getElementById("signup-username").value.trim();
+                            const email = document.getElementById("signup-email").value.trim();
+                            const pass = document.getElementById("signup-pass").value;
 
-        function openSettingsPopup() {
-            togglePopupMenu();
-            document.getElementById("settings-modal").classList.add("active");
-        }
+                            if (!username) {
+                                alert("Please enter a username.");
+                                document.getElementById("signup-username").focus();
+                                return;
+                            }
+                            if (!email || !pass) {
+                                alert("Please enter both email and password.");
+                                return;
+                            }
 
-        function closeSettingsModal() {
-            document.getElementById("settings-modal").classList.remove("active");
-        }
-
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById("uid-display").innerText = "ID: " + user.uid;
-                const userDocRef = db.collection("users").doc(user.uid);
-
-                userDocRef.get().then((doc) => {
-                    if (doc.exists) {
-                        currentUserData = doc.data();
-                        
-                        let updateData = {};
-                        let needsUpdate = false;
-
-                        if (!currentUserData.followers) { updateData.followers = []; needsUpdate = true; }
-                        if (!currentUserData.following) { updateData.following = []; needsUpdate = true; }
-
-                        if (needsUpdate) {
-                            userDocRef.set(updateData, { merge: true });
+                            firebase.auth().createUserWithEmailAndPassword(email, pass)
+                            .then((userCredential) => {
+                                const user = userCredential.user;
+                                return db.collection("users").doc(user.uid).set({
+                                    Username: username,
+                                    Bio: "nothing... :/",
+                                    Projects: [],
+                                    isBanned: false
+                                }, { merge: true }).then(() => {
+                                    handleUserRedirect(user);
+                                });
+                            })
+                            .catch((error) => {
+                                alert("Error: " + error.message);
+                            });
                         }
+                    }
+                },
+                footerHtml: `
+                    <div style="font-size: 11px; color: #666; margin: 4px 0 8px 0;">OR</div>
+                    <button class="btn-custom google-auth-btn" style="background: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px;">
+                        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.49h4.84c-.21 1.12-.86 2.08-1.82 2.72v2.26h2.94c1.72-1.58 2.78-3.9 2.78-6.63z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.94-2.26c-.81.54-1.84.86-3.02.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33C2.45 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.75c-.18-.54-.28-1.12-.28-1.75s.1-1.21.28-1.75V4.92H.96C.35 6.13 0 7.51 0 9s.35 2.87.96 4.08l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.45 2.02.96 4.92l3.01 2.33c.71-2.13 2.69-3.67 5.03-3.67z"/></svg>
+                        Sign up with Google
+                    </button>
+                `
+            });
+            attachGoogleAuthListener();
+        }
 
-                        document.getElementById("username-input").value = currentUserData.Username || "";
-                        document.getElementById("bio-input").value = currentUserData.Bio || "";
-                        document.getElementById("welcome-user").innerText = currentUserData.Username || "Creator Profile";
+        // 3. Login Popup generated via engine configuration
+        function openLoginPopup() {
+            dev.createpopup({
+                title: "Login to Account",
+                inputs: {
+                    "login-email": { type: "email", placeholder: "Email address" },
+                    "login-pass": { type: "password", placeholder: "Password" }
+                },
+                buttons: {
+                    "btn-login": {
+                        text: "Login",
+                        color: "#38b000",
+                        textColor: "#fff",
+                        onClick: () => {
+                            const email = document.getElementById("login-email").value.trim();
+                            const pass = document.getElementById("login-pass").value;
+
+                            if (!email || !pass) {
+                                alert("Please enter both email and password.");
+                                return;
+                            }
+
+                            firebase.auth().signInWithEmailAndPassword(email, pass)
+                            .then((userCredential) => {
+                                handleUserRedirect(userCredential.user);
+                            })
+                            .catch((error) => {
+                                alert("Error: " + error.message);
+                            });
+                        }
+                    }
+                },
+                footerHtml: `
+                    <button type="button" style="font-size: 13px; color: #0077b6; background: none; border: none; cursor: pointer; text-decoration: underline; margin-bottom: 6px; font-family: 'Cherry Bomb One', cursive, sans-serif;" onclick="triggerPasswordReset()">Forgot password?</button>
+                    <div style="font-size: 11px; color: #666; margin: 4px 0 8px 0;">OR</div>
+                    <button class="btn-custom google-auth-btn" style="background: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px;">
+                        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.49h4.84c-.21 1.12-.86 2.08-1.82 2.72v2.26h2.94c1.72-1.58 2.78-3.9 2.78-6.63z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.94-2.26c-.81.54-1.84.86-3.02.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33C2.45 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.75c-.18-.54-.28-1.12-.28-1.75s.1-1.21.28-1.75V4.92H.96C.35 6.13 0 7.51 0 9s.35 2.87.96 4.08l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.45 2.02.96 4.92l3.01 2.33c.71-2.13 2.69-3.67 5.03-3.67z"/></svg>
+                        Sign in with Google
+                    </button>
+                `
+            });
+            attachGoogleAuthListener();
+        }
+
+        function triggerPasswordReset() {
+            const emailInput = document.getElementById('login-email');
+            const email = emailInput ? emailInput.value.trim() : '';
+
+            if (!email) {
+                alert("Please enter your email address in the login email field first, then click 'Forgot password?'.");
+                if (emailInput) emailInput.focus();
+                return;
+            }
+
+            firebase.auth().sendPasswordResetEmail(email)
+                .then(() => {
+                    alert("Password reset email sent! Check your inbox.");
+                })
+                .catch((error) => {
+                    alert("Error: " + error.message);
+                });
+        }
+
+        // Re-attach Google Auth listener to dynamically created engine buttons
+        function attachGoogleAuthListener() {
+            document.querySelectorAll('.google-auth-btn').forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' });
+
+                    firebase.auth().signInWithPopup(provider)
+                    .then((result) => {
+                        const user = result.user;
+                        const userRef = db.collection("users").doc(user.uid);
                         
-                        document.getElementById("followers-count").innerText = (currentUserData.followers || []).length;
-                        document.getElementById("following-count").innerText = (currentUserData.following || []).length;
-                    } else {
-                        currentUserData = {
-                            Username: "DevWorldUser",
-                            Bio: "Building awesome games!",
-                            followers: [],
-                            following: []
-                        };
-                        userDocRef.set(currentUserData, { merge: true });
-                        document.getElementById("welcome-user").innerText = "DevWorldUser";
-                    }
-                });
-
-                loadUserContent(user.uid);
-            } else {
-                window.location.href = "index.html";
-            }
-        });
-
-        async function openFollowersModal() {
-            if (!currentUserData) return;
-            document.getElementById('social-modal-title').innerText = "Followers";
-            await renderUserList(currentUserData.followers || []);
-            document.getElementById('social-modal').classList.add('active');
-        }
-
-        async function openFollowingModal() {
-            if (!currentUserData) return;
-            document.getElementById('social-modal-title').innerText = "Following";
-            await renderUserList(currentUserData.following || []);
-            document.getElementById('social-modal').classList.add('active');
-        }
-
-        function closeSocialModal() {
-            document.getElementById('social-modal').classList.remove('active');
-        }
-
-        async function renderUserList(userIds) {
-            const listContainer = document.getElementById('social-user-list');
-            listContainer.innerHTML = '<div style="font-size: 13px; color: #555; text-align: center;">Loading...</div>';
-
-            if (userIds.length === 0) {
-                listContainer.innerHTML = '<div style="font-size: 13px; color: #555; text-align: center;">No users found.</div>';
-                return;
-            }
-
-            listContainer.innerHTML = '';
-            for (let uid of userIds) {
-                try {
-                    let userDoc = await db.collection("users").doc(uid).get();
-                    if (userDoc.exists) {
-                        let uData = userDoc.data();
-                        let username = uData.Username || uData.username || "User";
-
-                        let item = document.createElement('a');
-                        item.className = 'user-popup-item';
-                        item.href = `userprofile.html?id=${uid}`;
-                        item.innerHTML = `
-                            <img src="https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/people.png" class="inline-card-icon" onerror="this.src='people.png'">
-                            <span>${username}</span>
-                        `;
-                        listContainer.appendChild(item);
-                    }
-                } catch (err) {
-                    console.error("Error fetching user popup item:", err);
-                }
-            }
-        }
-
-        async function loadUserContent(uid) {
-            if (cachedGames.length === 0) {
-                try {
-                    const gameSnap = await db.collection("games").where("authorId", "==", uid).get();
-                    cachedGames = [];
-                    gameSnap.forEach(doc => {
-                        cachedGames.push({ id: doc.id, ...doc.data() });
-                    });
-                } catch (err) {
-                    console.error("Error loading games:", err);
-                }
-            }
-
-            renderGamesChunk();
-
-            if (cachedPosts.length === 0) {
-                const postsContainer = document.getElementById("my-posts-list");
-                try {
-                    const postSnap = await db.collection("posts").where("authorId", "==", uid).get();
-                    postsContainer.innerHTML = "";
-                    if (postSnap.empty) {
-                        postsContainer.innerHTML = '<div style="font-size:13px; color:#555;">No posts shared yet.</div>';
-                    } else {
-                        postSnap.forEach(doc => {
-                            const post = doc.data();
-                            cachedPosts.push({ id: doc.id, ...post });
-                            const card = document.createElement("div");
-                            card.className = "content-card";
-                            card.innerHTML = `
-                                <div style="font-size:13px; word-break:break-word; display:flex; align-items:flex-start;">
-                                    <img src="https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/postsctrl.png" class="inline-card-icon" onerror="this.src='postsctrl.png'" style="margin-top:2px;">
-                                    <span>${post.text}</span>
-                                </div>
-                            `;
-                            const delBtn = document.createElement("button");
-                            delBtn.className = "btn-item-delete";
-                            delBtn.innerText = "Delete Post";
-                            delBtn.onclick = () => deletePost(doc.id, uid);
-                            card.appendChild(delBtn);
-                            postsContainer.appendChild(card);
+                        return userRef.get().then((doc) => {
+                            if (!doc.exists) {
+                                return userRef.set({
+                                    Username: user.displayName || "DevWorldUser",
+                                    Bio: "this user didnt leave a bio for you to read.",
+                                    Projects: [],
+                                    isBanned: false
+                                });
+                            }
+                        }).then(() => {
+                            handleUserRedirect(user);
                         });
-                    }
-                } catch (err) {
-                    console.error("Error loading posts:", err);
-                }
-            }
-        }
-
-        function renderGamesChunk() {
-            const gamesContainer = document.getElementById("my-games-list");
-            const showNextBtn = document.getElementById("show-next-games-btn");
-
-            if (cachedGames.length === 0) {
-                gamesContainer.innerHTML = '<div style="font-size:13px; color:#555;">No games created yet.</div>';
-                showNextBtn.style.display = "none";
-                return;
-            }
-
-            if (currentGameIndex === 0) {
-                gamesContainer.innerHTML = "";
-            }
-
-            const chunk = cachedGames.slice(currentGameIndex, currentGameIndex + PAGE_SIZE);
-            chunk.forEach(game => {
-                const card = document.createElement("div");
-                card.className = "content-card";
-                card.innerHTML = `
-                    <a href="play.html?id=${game.id}" class="card-title">
-                        <img src="https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/gamectrl.png" class="inline-card-icon" onerror="this.src='gamectrl.png'">
-                        ${game.title || "Untitled"}
-                    </a>
-                    <div class="card-meta">Visits: ${game.visits || 0}</div>
-                `;
-                const delBtn = document.createElement("button");
-                delBtn.className = "btn-item-delete";
-                delBtn.innerText = "Delete Game";
-                delBtn.onclick = () => deleteGame(game.id, firebase.auth().currentUser.uid);
-                card.appendChild(delBtn);
-                gamesContainer.appendChild(card);
-            });
-
-            currentGameIndex += PAGE_SIZE;
-
-            if (currentGameIndex < cachedGames.length) {
-                showNextBtn.style.display = "block";
-            } else {
-                showNextBtn.style.display = "none";
-            }
-        }
-
-        function showNextGames() {
-            renderGamesChunk();
-        }
-
-        async function deleteGame(gameId, uid) {
-            if (!confirm("Are you sure you want to delete this game?")) return;
-            try {
-                await db.collection("games").doc(gameId).delete();
-                cachedGames = cachedGames.filter(g => g.id !== gameId);
-                currentGameIndex = 0;
-                document.getElementById("my-games-list").innerHTML = "";
-                renderGamesChunk();
-                alert("Game deleted.");
-            } catch (err) {
-                alert("Failed to delete game: " + err.message);
-            }
-        }
-
-        async function deletePost(postId, uid) {
-            if (!confirm("Are you sure you want to delete this post?")) return;
-            try {
-                await db.collection("posts").doc(postId).delete();
-                cachedPosts = cachedPosts.filter(p => p.id !== postId);
-                alert("Post deleted.");
-                location.reload();
-            } catch (err) {
-                alert("Failed to delete post: " + err.message);
-            }
-        }
-
-        document.getElementById("save-btn").addEventListener("click", () => {
-            const user = firebase.auth().currentUser;
-            if (user) {
-                const newUsername = document.getElementById("username-input").value;
-                const newBio = document.getElementById("bio-input").value;
-
-                db.collection("users").doc(user.uid).set({
-                    Username: newUsername,
-                    Bio: newBio
-                }, { merge: true })
-                .then(() => {
-                    document.getElementById("welcome-user").innerText = newUsername;
-                    if (currentUserData) currentUserData.Username = newUsername;
-                    alert("Profile updated successfully!");
-                    closeEditProfileModal();
-                })
-                .catch((error) => {
-                    alert("Error saving: " + error.message);
+                    })
+                    .catch((error) => {
+                        alert("Google Sign-In failed: " + error.message);
+                    });
                 });
-            }
-        });
-
-        document.getElementById("logout-btn").addEventListener("click", () => {
-            firebase.auth().signOut().then(() => {
-                window.location.href = "index.html";
             });
-        });
-
-        const deleteModal = document.getElementById('delete-modal');
-
-        document.getElementById('delete-account-btn').addEventListener('click', () => {
-            closeSettingsModal();
-            deleteModal.classList.add('active');
-        });
-
-        document.getElementById('cancel-delete-btn').addEventListener('click', () => {
-            deleteModal.classList.remove('active');
-        });
-
-        document.getElementById('confirm-delete-btn').addEventListener('click', () => {
-            const user = firebase.auth().currentUser;
-            if (user) {
-                db.collection("users").doc(user.uid).delete()
-                .then(() => user.delete())
-                .then(() => {
-                    alert("Your account has been successfully deleted.");
-                    window.location.href = "index.html";
-                })
-                .catch((error) => {
-                    if (error.code === 'auth/requires-recent-login') {
-                        alert("For security reasons, please log out and log back in before deleting your account.");
-                    } else {
-                        alert("Error deleting account: " + error.message);
-                    }
-                    deleteModal.classList.remove('active');
-                });
-            }
-        });
+        }
     </script>
 </body>
 </html>
