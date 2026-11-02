@@ -46,7 +46,7 @@ jobs:
           
           if 'versionName' in content:
               import re
-              content = re.sub(r'versionName \"[^\"]+\"', 'versionName \"0.1.6\"', content)
+              content = re.sub(r'versionName \"[^\"]+\"', 'versionName \"0.2.0-stable01\"', content)
               content = re.sub(r'versionCode \d+', 'versionCode 6', content)
           
           with open(build_path, 'w') as f:
