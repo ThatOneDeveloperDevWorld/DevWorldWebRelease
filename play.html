@@ -381,6 +381,7 @@
                 if (temp) {
                     levelData = JSON.parse(temp);
                     document.getElementById('level-title-display').innerText = "TEST MODE";
+                    registerCustomTiles(levelData.customTiles);
                     setupLevel();
                 } else {
                     alert("No test level data found.");
@@ -424,8 +425,11 @@
                             cols: data.cols || 16,
                             rows: data.rows || 16,
                             bgColor: data.bgColor || "#87CEEB",
-                            content: data.content
+                            content: data.content,
+                            customTiles: data.customTiles || []
                         };
+
+                        registerCustomTiles(levelData.customTiles);
 
                         firebase.auth().onAuthStateChanged(async (user) => {
                             const isCreator = user && (user.uid === data.authorId || user.uid === data.creatorId);
@@ -475,6 +479,18 @@
             }
         }
 
+        function registerCustomTiles(customTilesArray) {
+            if (!customTilesArray || !Array.isArray(customTilesArray)) return;
+            customTilesArray.forEach(tile => {
+                if (tile.id && tile.img) {
+                    let img = new Image();
+                    img.src = tile.img;
+                    loadedImages[tile.id] = img;
+                    tileFallbackColors[tile.id] = '#cccccc';
+                }
+            });
+        }
+
         function setupLevel() {
             document.getElementById('game-wrapper').style.backgroundColor = levelData.bgColor || "#87CEEB";
             
@@ -512,7 +528,10 @@
             if (player.x < 0) player.x = 0;
             if (player.x > boxSize - player.w) player.x = boxSize - player.w;
 
-            const solidBlocks = ['grass', 'dirt', 'brick', 'sand', 'bridge'];
+            const solidBaseBlocks = ['grass', 'dirt', 'brick', 'sand', 'bridge'];
+            const customTileIds = (levelData.customTiles || []).map(t => t.id);
+            const solidBlocks = [...solidBaseBlocks, ...customTileIds];
+
             levelData.content.blocks.forEach(b => {
                 if (solidBlocks.includes(b.type)) {
                     let bx = b.x * tileSize;
@@ -638,7 +657,6 @@
             }
         }
 
-        // Safe DOM Content Loaded Initializer
         window.addEventListener('DOMContentLoaded', () => {
             initGamePlayer();
         });
