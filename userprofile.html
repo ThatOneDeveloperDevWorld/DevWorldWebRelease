@@ -57,10 +57,31 @@
             max-height: 90vh;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.2s ease;
+        }
+
+        .profile-pfp-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            border: 3px solid #000;
+            overflow: hidden;
+            margin: 0 auto 10px auto;
+            background: #f8f9fa;
+            box-shadow: 2px 2px 0px #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-pfp-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .logo-img {
-            max-width: 140px;
+            max-width: 120px;
             width: 100%;
             height: auto;
             display: block;
@@ -70,20 +91,20 @@
 
         .header-title {
             text-align: center;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 900;
             margin: 0 0 5px 0;
         }
 
         .uid-badge {
             text-align: center;
-            font-size: 11px;
+            font-size: 10px;
             font-family: monospace;
             background: #e9ecef;
             border: 1px dashed #000;
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             word-break: break-all;
         }
 
@@ -93,69 +114,69 @@
             background: #f8f9fa;
             border: 2px solid #000;
             border-radius: 8px;
-            padding: 6px;
-            margin-bottom: 10px;
-            font-size: 12px;
+            padding: 5px;
+            margin-bottom: 8px;
+            font-size: 11px;
             font-weight: 800;
             text-align: center;
         }
 
         .social-stats span {
             font-weight: 600;
-            font-size: 11px;
+            font-size: 10px;
             color: #555;
         }
 
         .label-title {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .info-box {
             width: 100%;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 2px solid #000;
             border-radius: 8px;
             background: #f8f9fa;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 600;
-            font-size: 13px;
-            min-height: 35px;
+            font-size: 12px;
+            min-height: 30px;
             word-break: break-word;
         }
 
         .section-header {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 900;
-            margin: 2px 0 6px 0;
+            margin: 2px 0 4px 0;
             text-transform: uppercase;
         }
 
         .games-container {
             flex: 1;
             overflow-y: auto;
-            max-height: 120px;
+            max-height: 90px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 5px;
+            margin-bottom: 8px;
             padding-right: 4px;
         }
 
         .game-item-card {
             background: #fdfdfd;
             border: 2px solid #000;
-            padding: 6px 10px;
-            border-radius: 8px;
+            padding: 5px 8px;
+            border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             text-decoration: none;
             color: #000;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             box-shadow: 2px 2px 0px #000;
             transition: transform 0.1s ease;
         }
@@ -165,20 +186,46 @@
             transform: translate(-1px, -1px);
         }
 
+        .ban-warning-container {
+            background: #fff3cd;
+            border: 2px solid #ff0000;
+            border-radius: 8px;
+            padding: 6px 8px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .ban-warning-banner {
+            max-width: 50px;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto 4px auto;
+        }
+
+        .ban-warning-text {
+            font-size: 10px;
+            font-weight: bold;
+            color: #000;
+            margin: 0;
+            line-height: 1.3;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
         .btn-custom {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 2px solid #000;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: 800;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
-            box-shadow: 3px 3px 0px #000;
+            box-shadow: 2px 2px 0px #000;
             transition: transform 0.1s ease;
             text-decoration: none;
             display: block;
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .btn-custom:active {
@@ -195,7 +242,12 @@
 
     <div class="clouds-bg"></div>
 
-    <div class="main-container">
+    <div id="main-profile-container" class="main-container">
+        <!-- Profile Picture Display -->
+        <div class="profile-pfp-container">
+            <img id="profile-pfp-display" src="people.png" alt="Profile Picture" class="profile-pfp-img" onerror="this.src='https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/people.png'">
+        </div>
+
         <img src="Devworldlogobeta.png" alt="Dev World Logo" class="logo-img">
         
         <h3 id="profile-username" class="header-title">Loading User...</h3>
@@ -313,7 +365,7 @@
 
                 // Real-time listener for target user profile
                 if (profileUnsubscribe) profileUnsubscribe();
-                profileUnsubscribe = db.collection("users").doc(targetUserId).onSnapshot((docSnap) => {
+                profileUnsubscribe = db.collection("users").doc(targetUserId).onSnapshot(async (docSnap) => {
                     if (docSnap.exists) {
                         const data = docSnap.data();
                         targetUsername = data.Username || data.username || "DevWorldUser";
@@ -322,52 +374,78 @@
                         document.getElementById("uid-display").innerText = "ID: " + targetUserId;
                         document.getElementById("profile-bio").innerText = data.Bio || data.bio || "No bio added yet.";
 
+                        // Apply profile color if set
+                        if (data.profileColor) {
+                            document.getElementById("main-profile-container").style.backgroundColor = data.profileColor;
+                        }
+
+                        // Set profile picture or default to people.png
+                        const pfpImg = document.getElementById("profile-pfp-display");
+                        if (data.pfpUrl && data.pfpUrl.trim() !== "") {
+                            pfpImg.src = data.pfpUrl;
+                        } else {
+                            pfpImg.src = "people.png";
+                        }
+
                         const followersList = Array.isArray(data.followers) ? data.followers : (Array.isArray(data.Followers) ? data.Followers : []);
                         const followingList = Array.isArray(data.following) ? data.following : (Array.isArray(data.Following) ? data.Following : []);
                         
                         document.getElementById("followers-count").innerText = followersList.length;
                         document.getElementById("following-count").innerText = followingList.length;
+
+                        // Check if user is banned or devPoints <= 79
+                        const devPoints = data.devPoints !== undefined ? data.devPoints : 100;
+                        const isBanned = data.isBanned === true || devPoints <= 79;
+
+                        const gamesListEl = document.getElementById("user-games-list");
+
+                        if (isBanned) {
+                            gamesListEl.innerHTML = `
+                                <div class="ban-warning-container">
+                                    <img src="bannedwarning.png" alt="Banned Warning" class="ban-warning-banner" onerror="this.src='https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/logo1.png?raw=true'">
+                                    <p class="ban-warning-text">this user has been banned. they can no longer use <b>dev world</b> on this account.</p>
+                                </div>
+                            `;
+                        } else {
+                            // Load user games
+                            gamesListEl.innerHTML = "";
+                            const allGamesSnapshot = await db.collection("games").get();
+                            let matchedGames = [];
+
+                            allGamesSnapshot.forEach(gDoc => {
+                                const game = gDoc.data();
+                                const gameAuthorId = game.authorId || game.creatorId || game.userId;
+                                if (gameAuthorId === targetUserId) {
+                                    matchedGames.push({ id: gDoc.id, ...game });
+                                }
+                            });
+
+                            if (matchedGames.length === 0) {
+                                gamesListEl.innerHTML = '<div style="font-size: 12px; color: #666; text-align: center; padding: 10px;">No games published yet.</div>';
+                                return;
+                            }
+
+                            matchedGames.forEach(game => {
+                                const card = document.createElement('a');
+                                card.className = 'game-item-card';
+                                card.href = `play.html?id=${game.id}`;
+                                
+                                const titleSpan = document.createElement('span');
+                                titleSpan.innerText = game.title || "Untitled Level";
+
+                                const badgeSpan = document.createElement('span');
+                                badgeSpan.style.fontSize = '10px';
+                                badgeSpan.style.background = '#e9ecef';
+                                badgeSpan.style.padding = '2px 6px';
+                                badgeSpan.style.borderRadius = '4px';
+                                badgeSpan.innerText = 'Play ▶';
+
+                                card.appendChild(titleSpan);
+                                card.appendChild(badgeSpan);
+                                gamesListEl.appendChild(card);
+                            });
+                        }
                     }
-                });
-
-                // Load user games
-                const gamesListEl = document.getElementById("user-games-list");
-                gamesListEl.innerHTML = "";
-
-                const allGamesSnapshot = await db.collection("games").get();
-                let matchedGames = [];
-
-                allGamesSnapshot.forEach(doc => {
-                    const game = doc.data();
-                    const gameAuthorId = game.authorId || game.creatorId || game.userId;
-                    if (gameAuthorId === targetUserId) {
-                        matchedGames.push({ id: doc.id, ...game });
-                    }
-                });
-
-                if (matchedGames.length === 0) {
-                    gamesListEl.innerHTML = '<div style="font-size: 12px; color: #666; text-align: center; padding: 10px;">No games published yet.</div>';
-                    return;
-                }
-
-                matchedGames.forEach(game => {
-                    const card = document.createElement('a');
-                    card.className = 'game-item-card';
-                    card.href = `play.html?id=${game.id}`;
-                    
-                    const titleSpan = document.createElement('span');
-                    titleSpan.innerText = game.title || "Untitled Level";
-
-                    const badgeSpan = document.createElement('span');
-                    badgeSpan.style.fontSize = '10px';
-                    badgeSpan.style.background = '#e9ecef';
-                    badgeSpan.style.padding = '2px 6px';
-                    badgeSpan.style.borderRadius = '4px';
-                    badgeSpan.innerText = 'Play ▶';
-
-                    card.appendChild(titleSpan);
-                    card.appendChild(badgeSpan);
-                    gamesListEl.appendChild(card);
                 });
 
             } catch (error) {

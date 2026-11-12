@@ -96,6 +96,11 @@
             box-shadow: 1px 1px 0px #000;
         }
 
+        .btn-settings {
+            background: #00f5d4;
+            color: #000;
+        }
+
         .toolbar-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -237,6 +242,70 @@
             border: 2px solid #fff;
         }
         .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Modal Overlay Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border: 3px solid #000;
+            border-radius: 14px;
+            box-shadow: 5px 5px 0px #000;
+            width: 100%;
+            max-width: 360px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Preview card mimicking home.html game-card-square */
+        .game-card-square-preview {
+            background: #ffffff;
+            border: 2.5px solid #000;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0px #000;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            color: #000;
+            gap: 6px;
+            width: 140px;
+            margin: 0 auto;
+        }
+
+        .game-card-img-preview {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border: 2px solid #000;
+            border-radius: 8px;
+        }
+
+        .game-card-title-preview {
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-top: 2px;
+        }
+
+        .visits-count-preview {
+            font-size: 12px;
+            color: #555;
+        }
     </style>
 </head>
 <body onload="initStudio()">
@@ -246,21 +315,24 @@
     <div class="main-container">
         <div class="nav-row">
             <img src="Devworldlogobeta.png" alt="Dev World" class="logo-img">
-            <a href="home.html" class="btn-sm">Exit</a>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn-sm btn-settings" onclick="openSettingsModal()">Settings</button>
+                <a href="home.html" class="btn-sm">Exit</a>
+            </div>
         </div>
 
         <div>
-            <label class="label-title">GAME TITLE (REQUIRED)</label>
-            <input type="text" id="game-title-input" class="input-field" placeholder="Name your awesome level...">
+            <label class="label-title">Game Title</label>
+            <input type="text" id="game-title-input" class="input-field" placeholder="Name your awesome level..." oninput="updatePreviewTitle()">
         </div>
 
         <div class="toolbar-grid">
             <div>
-                <label class="label-title">GRID SIZE (8-32)</label>
+                <label class="label-title">Grid Size</label>
                 <input type="number" id="grid-size" class="input-field" value="16" min="8" max="32" onchange="resizeGrid()">
             </div>
             <div>
-                <label class="label-title">BACKGROUND COLOR</label>
+                <label class="label-title">Background Color</label>
                 <input type="color" id="bg-color" class="input-field" value="#87CEEB" onchange="changeBackground()" style="height: 39px; padding: 2px; cursor: pointer;">
             </div>
         </div>
@@ -270,11 +342,12 @@
         </div>
 
         <div>
-            <label class="label-title">SELECT CATEGORY</label>
+            <label class="label-title">Select Category</label>
             <select id="category-select" class="category-select" onchange="switchCategory()">
-                <option value="tiles">🧱 Blocks & Tiles</option>
-                <option value="decor">🌿 Decor & Elements</option>
-                <option value="traps">⚠️ Hazards & Spikes</option>
+                <option value="tiles">Blocks and Tiles</option>
+                <option value="decor">Decor and Elements</option>
+                <option value="traps">Hazards and Spikes</option>
+                <option value="custom">Custom Tiles</option>
             </select>
         </div>
 
@@ -283,6 +356,43 @@
         <div class="action-buttons">
             <button class="btn-custom btn-test" onclick="testPlay()">Test Play</button>
             <button class="btn-custom btn-publish" onclick="publishGame()">Publish Game</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-box">
+            <h3 style="margin: 0; font-size: 18px;">Studio Settings</h3>
+
+            <div>
+                <label class="label-title">Game Icon</label>
+                <input type="text" id="game-icon-input" class="input-field" placeholder="link here..." oninput="validateGameIconUrl()">
+                <span id="game-icon-error" style="font-size: 10px; color: #ff595e; display: none;">Invalid format! Only .gif, .png, .jpg, and .jpeg are allowed.</span>
+            </div>
+
+            <!-- Home-style Preview -->
+            <div style="text-align: center; margin: 5px 0;">
+                <label class="label-title" style="margin-bottom: 6px;">Game Preview</label>
+                <div class="game-card-square-preview">
+                    <img id="preview-card-img" src="gameres.png" alt="Preview Icon" class="game-card-img-preview" onerror="this.src='gameres.png'">
+                    <div id="preview-card-title" class="game-card-title-preview">Untitled Level</div>
+                    <div class="visits-count-preview">0 visits</div>
+                </div>
+            </div>
+
+            <hr style="width: 100%; border: 1px solid #ddd; margin: 4px 0;">
+
+            <div>
+                <label class="label-title">Custom Tile</label>
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+                    <input type="text" id="custom-tile-name" class="input-field" placeholder="name..." />
+                    <input type="text" id="custom-tile-url" class="input-field" placeholder="link here..." oninput="validateCustomTileUrl()" />
+                </div>
+                <span id="tile-url-error" style="font-size: 10px; color: #ff595e; display: none;">Invalid image format! Only .gif, .png, .jpg, and .jpeg allowed.</span>
+                <button class="btn-sm" style="background: #55ff55; color: #000; width: 100%; margin-top: 6px;" onclick="addCustomTile()">Add Custom Tile</button>
+            </div>
+
+            <button class="btn-sm" style="background: #e9ecef; color: #000; margin-top: 8px;" onclick="closeSettingsModal()">Close</button>
         </div>
     </div>
 
@@ -299,10 +409,11 @@
 
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
-        // Force long polling to prevent hanging requests on local/restricted setups
         db.settings({ experimentalForceLongPolling: true });
 
+        const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif'];
         let currentUser = null;
+
         firebase.auth().onAuthStateChanged((user) => {
             if (user) { 
                 currentUser = user; 
@@ -331,7 +442,8 @@
             traps: [
                 { id: 'spike', name: 'Spike', img: 'spike.png' },
                 { id: 'lava', name: 'Lava', img: 'lava.png' }
-            ]
+            ],
+            custom: []
         };
 
         let currentSize = 16;
@@ -346,6 +458,76 @@
             setTimeout(() => t.classList.remove('show'), 2000);
         }
 
+        function openSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function updatePreviewTitle() {
+            const title = document.getElementById('game-title-input').value.trim();
+            document.getElementById('preview-card-title').innerText = title || "Untitled Level";
+        }
+
+        function validateGameIconUrl() {
+            const input = document.getElementById('game-icon-input').value.trim();
+            const errSpan = document.getElementById('game-icon-error');
+            const previewImg = document.getElementById('preview-card-img');
+
+            if (!input) { 
+                errSpan.style.display = 'none'; 
+                previewImg.src = 'gameres.png';
+                return true; 
+            }
+
+            const clean = input.split('?')[0].split('#')[0].toLowerCase();
+            const isValid = ALLOWED_EXTENSIONS.some(ext => clean.endsWith(ext));
+            errSpan.style.display = isValid ? 'none' : 'block';
+
+            if (isValid) {
+                previewImg.src = input;
+            } else {
+                previewImg.src = 'gameres.png';
+            }
+            return isValid;
+        }
+
+        function validateCustomTileUrl() {
+            const input = document.getElementById('custom-tile-url').value.trim();
+            const errSpan = document.getElementById('tile-url-error');
+            if (!input) { errSpan.style.display = 'none'; return true; }
+            const clean = input.split('?')[0].split('#')[0].toLowerCase();
+            const isValid = ALLOWED_EXTENSIONS.some(ext => clean.endsWith(ext));
+            errSpan.style.display = isValid ? 'none' : 'block';
+            return isValid;
+        }
+
+        function addCustomTile() {
+            const nameInput = document.getElementById('custom-tile-name').value.trim();
+            const urlInput = document.getElementById('custom-tile-url').value.trim();
+
+            if (!nameInput) {
+                alert("Please enter a custom tile name!");
+                return;
+            }
+            if (!urlInput || !validateCustomTileUrl()) {
+                alert("Please enter a valid image URL ending in .png, .jpg, .jpeg, or .gif");
+                return;
+            }
+
+            const customId = 'custom_' + Date.now();
+            catalog.custom.push({ id: customId, name: nameInput, img: urlInput });
+
+            document.getElementById('custom-tile-name').value = '';
+            document.getElementById('custom-tile-url').value = '';
+            document.getElementById('category-select').value = 'custom';
+            switchCategory();
+            showToast("Custom tile added!");
+            closeSettingsModal();
+        }
+
         function initStudio() {
             switchCategory();
             buildGrid();
@@ -358,7 +540,7 @@
 
             let eraserDiv = document.createElement('div');
             eraserDiv.className = `block-option ${currentTileType === 'eraser' ? 'selected' : ''}`;
-            eraserDiv.innerHTML = '<span style="font-size:14px; font-weight:bold; color:#ff595e;">❌</span>';
+            eraserDiv.innerHTML = '<span style="font-size:14px; font-weight:bold; color:#ff595e;">X</span>';
             eraserDiv.title = 'Eraser';
             eraserDiv.onclick = () => selectTool('eraser', eraserDiv);
             drawer.appendChild(eraserDiv);
@@ -367,7 +549,7 @@
                 let div = document.createElement('div');
                 div.className = `block-option ${currentTileType === item.id ? 'selected' : ''}`;
                 if (item.img) {
-                    div.innerHTML = `<img src="${item.img}" alt="${item.name}">`;
+                    div.innerHTML = `<img src="${item.img}" alt="${item.name}" onerror="this.src='gameres.png'">`;
                 } else {
                     div.innerHTML = `<span style="font-size:16px;">${item.emoji}</span>`;
                 }
@@ -419,7 +601,7 @@
         function renderCells() {
             const container = document.getElementById('grid-container');
             const cells = container.children;
-            const flatCatalog = [...catalog.tiles, ...catalog.decor, ...catalog.traps];
+            const flatCatalog = [...catalog.tiles, ...catalog.decor, ...catalog.traps, ...catalog.custom];
 
             for (let i = 0; i < cells.length; i++) {
                 let cell = cells[i];
@@ -491,7 +673,8 @@
                 cols: currentSize,
                 rows: currentSize,
                 bgColor: document.getElementById('bg-color').value,
-                content: levelData
+                content: levelData,
+                customTiles: catalog.custom
             }));
             window.location.href = 'play.html?mode=test';
         }
@@ -504,10 +687,17 @@
                 return;
             }
 
+            const iconUrl = document.getElementById('game-icon-input').value.trim();
+            if (iconUrl && !validateGameIconUrl()) {
+                alert("Please fix your game icon URL or leave it blank.");
+                return;
+            }
+
             let authorId = currentUser ? currentUser.uid : "anonymous_dev";
 
             const gamePayload = {
                 title: title,
+                iconUrl: iconUrl || null,
                 authorId: authorId,
                 creatorId: authorId,
                 genre: "Platformer",
@@ -516,13 +706,13 @@
                 bgColor: document.getElementById('bg-color').value || "#87CEEB",
                 visits: 0,
                 content: levelData,
+                customTiles: catalog.custom,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             try {
                 showToast("Publishing...");
                 
-                // Add a timeout safeguard so it errors out if Firestore hangs silently
                 const timeoutPromise = new Promise((_, reject) => 
                     setTimeout(() => reject(new Error("Publishing timed out. Check your connection or Firebase rules.")), 6000)
                 );

@@ -34,10 +34,8 @@
 
         .clouds-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 200%;
-            height: 200%;
+            top: 0; left: 0;
+            width: 200%; height: 200%;
             background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
             background-repeat: repeat-x;
             background-size: contain;
@@ -85,15 +83,27 @@
             box-shadow: 0 8px 0px #000000;
             padding: 30px 15px;
             text-align: left;
+            transition: background-color 0.2s ease;
         }
 
-        .logo-img {
-            max-width: 160px;
+        .profile-pfp-container {
+            width: 90px;
+            height: 90px;
+            border-radius: 10px;
+            border: 3px solid #000;
+            overflow: hidden;
+            margin: 0 auto 12px auto;
+            background: #f8f9fa;
+            box-shadow: 2px 2px 0px #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-pfp-img {
             width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto 15px auto;
-            filter: drop-shadow(3px 3px 0px #000);
+            height: 100%;
+            object-fit: cover;
         }
 
         .header-title {
@@ -134,21 +144,9 @@
             transition: background 0.1s ease;
         }
 
-        .stat-box:hover {
-            background: #e2e6ea;
-        }
-
-        .social-stats span {
-            font-size: 12px;
-            color: #555;
-            display: block;
-        }
-
-        .label-title {
-            font-size: 13px;
-            display: block;
-            margin-bottom: 4px;
-        }
+        .stat-box:hover { background: #e2e6ea; }
+        .social-stats span { font-size: 12px; color: #555; display: block; }
+        .label-title { font-size: 13px; display: block; margin-bottom: 4px; }
 
         .input-field {
             width: 100%;
@@ -160,6 +158,17 @@
             font-size: 14px;
             font-family: 'Cherry Bomb One', cursive, sans-serif;
             outline: none;
+        }
+
+        .color-input-field {
+            width: 100%;
+            height: 45px;
+            padding: 4px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            background: #f8f9fa;
+            margin-bottom: 12px;
+            cursor: pointer;
         }
 
         .btn-custom {
@@ -198,9 +207,7 @@
         }
 
         @media (max-width: 768px) {
-            .content-split-grid {
-                grid-template-columns: 1fr;
-            }
+            .content-split-grid { grid-template-columns: 1fr; }
         }
 
         .section-column-title {
@@ -235,8 +242,7 @@
         }
 
         .inline-card-icon {
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             object-fit: contain;
             vertical-align: middle;
             margin-right: 6px;
@@ -252,10 +258,7 @@
             align-items: center;
         }
 
-        .card-meta {
-            font-size: 11px;
-            color: #555;
-        }
+        .card-meta { font-size: 11px; color: #555; }
 
         .btn-item-delete {
             background: #ff595e;
@@ -286,10 +289,8 @@
 
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6);
             display: flex;
             align-items: center;
@@ -339,28 +340,23 @@
             box-shadow: 2px 2px 0px #000;
         }
 
-        .user-popup-item:hover {
-            background: #e9ecef;
-        }
+        .user-popup-item:hover { background: #e9ecef; }
 
         .popup-menu-dropdown {
             position: absolute;
-            top: 55px;
-            left: 0;
+            top: 55px; left: 0;
             background: #ffffff;
             border: 3px solid #000000;
             border-radius: 14px;
             box-shadow: 4px 4px 0px #000000;
-            width: 180px;
+            width: 200px;
             display: none;
             flex-direction: column;
             padding: 8px;
             z-index: 20;
         }
 
-        .popup-menu-dropdown.active {
-            display: flex;
-        }
+        .popup-menu-dropdown.active { display: flex; }
 
         .popup-menu-item {
             background: #f8f9fa;
@@ -377,8 +373,29 @@
             transition: background 0.1s;
         }
 
-        .popup-menu-item:hover {
-            background: #e2e6ea;
+        .popup-menu-item:hover { background: #e2e6ea; }
+
+        /* Dev Points Modal Styling */
+        .dev-points-banner {
+            max-width: 120px;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto 12px auto;
+        }
+
+        .dev-points-display-box {
+            font-size: 22px;
+            margin: 15px 0;
+        }
+
+        .dev-points-explanation {
+            font-size: 12px;
+            color: #000000;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            margin-top: 10px;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -392,14 +409,18 @@
             <div id="popup-menu" class="popup-menu-dropdown">
                 <button class="popup-menu-item" onclick="openEditProfilePopup()">Edit Profile</button>
                 <button class="popup-menu-item" onclick="openWallet()">Wallet</button>
+                <button class="popup-menu-item" onclick="openDevPointsModal()">Dev Points</button>
                 <button class="popup-menu-item" onclick="openSettingsPopup()">Settings</button>
             </div>
         </div>
         <button class="menu-btn" onclick="window.location.href='home.html'">Home</button>
     </div>
 
-    <div class="main-container">
-        <img src="Devworldlogobeta.png" alt="Dev World Logo" class="logo-img" onerror="this.src='https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/logo1.png?raw=true'">
+    <div id="main-profile-container" class="main-container">
+        <!-- Profile Picture Display (Square) -->
+        <div class="profile-pfp-container">
+            <img id="profile-pfp-display" src="people.png" alt="Profile Picture" class="profile-pfp-img" onerror="this.src='https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/people.png'">
+        </div>
         
         <h3 id="welcome-user" class="header-title">Loading...</h3>
         <div id="uid-display" class="uid-badge">ID: Loading...</div>
@@ -434,14 +455,38 @@
     <div id="edit-profile-modal" class="modal-overlay">
         <div class="modal-content">
             <h3 style="margin-top: 0; font-size: 20px;">Edit Profile</h3>
+            
             <label class="label-title" style="text-align: left;">USERNAME</label>
             <input type="text" id="username-input" class="input-field" placeholder="Username">
             
+            <label class="label-title" style="text-align: left;">PROFILE PICTURE URL</label>
+            <input type="text" id="pfp-url-input" class="input-field" placeholder="https://example.com/image.png">
+
+            <label class="label-title" style="text-align: left;">PROFILE COLOR</label>
+            <input type="color" id="profile-color-input" class="color-input-field" value="#ffffff">
+
             <label class="label-title" style="text-align: left;">BIO</label>
             <textarea id="bio-input" class="input-field" rows="3" placeholder="Tell us about yourself..."></textarea>
             
             <button id="save-btn" class="btn-custom btn-save">Save Profile</button>
             <button class="btn-custom" style="background: #e9ecef; color: #000; margin-bottom: 0;" onclick="closeEditProfileModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Dev Points Modal -->
+    <div id="dev-points-modal" class="modal-overlay">
+        <div class="modal-content">
+            <img src="bannedwarning.png" alt="Warning Banner" class="dev-points-banner" onerror="this.src='https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/logo1.png?raw=true'">
+            
+            <div id="modal-dev-points-display" class="dev-points-display-box">
+                Loading...
+            </div>
+
+            <div class="dev-points-explanation">
+                these are your <b>dev points</b>. the lower you go, the more <b>restricted</b> you get.
+            </div>
+
+            <button class="btn-custom" style="background: #e9ecef; color: #000; margin-top: 15px; margin-bottom: 0;" onclick="closeDevPointsModal()">Close</button>
         </div>
     </div>
 
@@ -495,10 +540,7 @@
         const db = firebase.firestore();
         db.settings({ experimentalForceLongPolling: true });
 
-        // Persistence code completely removed, matching v0.1.4 behavior
-
         let currentUserData = null;
-        
         let cachedGames = [];
         let cachedPosts = [];
         let currentGameIndex = 0;
@@ -522,6 +564,15 @@
             window.location.href = "wallet.html";
         }
 
+        function openDevPointsModal() {
+            togglePopupMenu();
+            document.getElementById("dev-points-modal").classList.add("active");
+        }
+
+        function closeDevPointsModal() {
+            document.getElementById("dev-points-modal").classList.remove("active");
+        }
+
         function openSettingsPopup() {
             togglePopupMenu();
             document.getElementById("settings-modal").classList.add("active");
@@ -540,11 +591,45 @@
                     if (doc.exists) {
                         currentUserData = doc.data();
                         
+                        let devPoints = currentUserData.devPoints !== undefined ? currentUserData.devPoints : 100;
+
+                        // Automatic ban check if dev points drop into banned range (79 to 0) -> sets isBanned to true
+                        if (devPoints <= 79) {
+                            userDocRef.set({ isBanned: true }, { merge: true }).then(() => {
+                                alert("Your account has been banned. reason: dev points = " + devPoints + ".");
+                                firebase.auth().signOut().then(() => {
+                                    window.location.href = "index.html";
+                                });
+                            });
+                            return;
+                        }
+
+                        // Populate the Dev Points modal status display with plain colored text (no background, no emojis)
+                        const modalDisplay = document.getElementById("modal-dev-points-display");
+
+                        if (devPoints === 100) {
+                            modalDisplay.style.color = "#2b8a3e"; // Green
+                            modalDisplay.innerText = `${devPoints}`;
+                        } else if (devPoints >= 90 && devPoints <= 99) {
+                            modalDisplay.style.color = "#f59f00"; // Yellow
+                            modalDisplay.innerText = `${devPoints}`;
+                        } else if (devPoints >= 80 && devPoints <= 89) {
+                            modalDisplay.style.color = "#d9480f"; // Orange
+                            modalDisplay.innerText = `${devPoints}`;
+                        } else {
+                            modalDisplay.style.color = "#c92a2a"; // Red
+                            modalDisplay.innerText = `${devPoints}`;
+                        }
+
                         let updateData = {};
                         let needsUpdate = false;
 
                         if (!currentUserData.followers) { updateData.followers = []; needsUpdate = true; }
                         if (!currentUserData.following) { updateData.following = []; needsUpdate = true; }
+                        if (currentUserData.devPoints === undefined) { updateData.devPoints = 100; needsUpdate = true; }
+                        if (currentUserData.isBanned === undefined) { updateData.isBanned = false; needsUpdate = true; }
+                        if (currentUserData.pfpUrl === undefined) { updateData.pfpUrl = ""; needsUpdate = true; }
+                        if (currentUserData.profileColor === undefined) { updateData.profileColor = "#ffffff"; needsUpdate = true; }
 
                         if (needsUpdate) {
                             userDocRef.set(updateData, { merge: true });
@@ -552,8 +637,21 @@
 
                         document.getElementById("username-input").value = currentUserData.Username || "";
                         document.getElementById("bio-input").value = currentUserData.Bio || "";
+                        document.getElementById("pfp-url-input").value = currentUserData.pfpUrl || "";
+                        document.getElementById("profile-color-input").value = currentUserData.profileColor || "#ffffff";
                         document.getElementById("welcome-user").innerText = currentUserData.Username || "Creator Profile";
                         
+                        // Set main profile card background color
+                        document.getElementById("main-profile-container").style.backgroundColor = currentUserData.profileColor || "#ffffff";
+
+                        // Set profile picture or default to people.png
+                        const pfpImg = document.getElementById("profile-pfp-display");
+                        if (currentUserData.pfpUrl && currentUserData.pfpUrl.trim() !== "") {
+                            pfpImg.src = currentUserData.pfpUrl;
+                        } else {
+                            pfpImg.src = "people.png";
+                        }
+
                         document.getElementById("followers-count").innerText = (currentUserData.followers || []).length;
                         document.getElementById("following-count").innerText = (currentUserData.following || []).length;
                     } else {
@@ -561,10 +659,16 @@
                             Username: "DevWorldUser",
                             Bio: "Building awesome games!",
                             followers: [],
-                            following: []
+                            following: [],
+                            devPoints: 100,
+                            isBanned: false,
+                            pfpUrl: "",
+                            profileColor: "#ffffff"
                         };
                         userDocRef.set(currentUserData, { merge: true });
                         document.getElementById("welcome-user").innerText = "DevWorldUser";
+                        document.getElementById("profile-pfp-display").src = "people.png";
+                        document.getElementById("main-profile-container").style.backgroundColor = "#ffffff";
                     }
                 });
 
@@ -652,8 +756,7 @@
                             cachedPosts.push({ id: doc.id, ...post });
                             const card = document.createElement("div");
                             card.className = "content-card";
-                            card.innerHTML = `
-                                <div style="font-size:13px; word-break:break-word; display:flex; align-items:flex-start;">
+                            card.innerHTML = `<div style="font-size:13px; word-break:break-word; display:flex; align-items:flex-start;">
                                     <img src="https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/postsctrl.png" class="inline-card-icon" onerror="this.src='postsctrl.png'" style="margin-top:2px;">
                                     <span>${post.text}</span>
                                 </div>
@@ -700,7 +803,7 @@
                 const delBtn = document.createElement("button");
                 delBtn.className = "btn-item-delete";
                 delBtn.innerText = "Delete Game";
-                delBtn.onclick = () => deleteGame(game.id, firebase.auth().currentUser.uid);
+                delBtn.onclick = () => deleteGame(game.id, firebase.auth().currentUser.uid, game.authorId);
                 card.appendChild(delBtn);
                 gamesContainer.appendChild(card);
             });
@@ -718,15 +821,44 @@
             renderGamesChunk();
         }
 
-        async function deleteGame(gameId, uid) {
-            if (!confirm("Are you sure you want to delete this game?")) return;
+        // Admin game deletion handling dev points deduction and ban flag
+        async function deleteGame(gameId, currentAuthUid, authorId) {
+            const adminUid = 'ccZGPg7EzbNphnL0du3msMFIpjJ3';
+            const isAdmin = (currentAuthUid === adminUid);
+
+            let confirmMsg = isAdmin && currentAuthUid !== authorId ? 
+                "Admin Action: Delete this user's game and deduct 10 Dev Points?" : 
+                "Are you sure you want to delete this game?";
+
+            if (!confirm(confirmMsg)) return;
+
             try {
                 await db.collection("games").doc(gameId).delete();
+
+                if (isAdmin && currentAuthUid !== authorId) {
+                    const targetUserRef = db.collection("users").doc(authorId);
+                    await db.runTransaction(async (transaction) => {
+                        const userDoc = await transaction.get(targetUserRef);
+                        let currentPoints = 100;
+                        if (userDoc.exists && userDoc.data().devPoints !== undefined) {
+                            currentPoints = userDoc.data().devPoints;
+                        }
+                        const newPoints = Math.max(0, currentPoints - 10);
+                        let updatePayload = { devPoints: newPoints };
+                        if (newPoints <= 79) {
+                            updatePayload.isBanned = true;
+                        }
+                        transaction.set(targetUserRef, updatePayload, { merge: true });
+                    });
+                    alert("Game deleted by admin. Author Dev Points reduced by 10.");
+                } else {
+                    alert("Game deleted.");
+                }
+
                 cachedGames = cachedGames.filter(g => g.id !== gameId);
                 currentGameIndex = 0;
                 document.getElementById("my-games-list").innerHTML = "";
                 renderGamesChunk();
-                alert("Game deleted.");
             } catch (err) {
                 alert("Failed to delete game: " + err.message);
             }
@@ -749,14 +881,31 @@
             if (user) {
                 const newUsername = document.getElementById("username-input").value;
                 const newBio = document.getElementById("bio-input").value;
+                const newPfpUrl = document.getElementById("pfp-url-input").value.trim();
+                const newProfileColor = document.getElementById("profile-color-input").value;
 
                 db.collection("users").doc(user.uid).set({
                     Username: newUsername,
-                    Bio: newBio
+                    Bio: newBio,
+                    pfpUrl: newPfpUrl,
+                    profileColor: newProfileColor
                 }, { merge: true })
                 .then(() => {
                     document.getElementById("welcome-user").innerText = newUsername;
-                    if (currentUserData) currentUserData.Username = newUsername;
+                    document.getElementById("main-profile-container").style.backgroundColor = newProfileColor;
+                    
+                    const pfpImg = document.getElementById("profile-pfp-display");
+                    if (newPfpUrl) {
+                        pfpImg.src = newPfpUrl;
+                    } else {
+                        pfpImg.src = "people.png";
+                    }
+
+                    if (currentUserData) {
+                        currentUserData.Username = newUsername;
+                        currentUserData.pfpUrl = newPfpUrl;
+                        currentUserData.profileColor = newProfileColor;
+                    }
                     alert("Profile updated successfully!");
                     closeEditProfileModal();
                 })

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev World CREATE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            background-color: #1a1a24;
+            color: #ffffff;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header-card {
+            background: #252636;
+            border: 3px solid #000;
+            border-radius: 14px;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        .app-title {
+            margin: 0;
+            font-size: 24px;
+            color: #55ff55;
+            text-shadow: 2px 2px 0px #000;
+            letter-spacing: 1px;
+        }
+
+        .user-tag-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-tag {
+            font-size: 14px;
+            color: #ffcc00;
+            background: #1a1a24;
+            padding: 6px 12px;
+            border: 2px solid #000;
+            border-radius: 8px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-action {
+            background: #55ff55;
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            text-transform: uppercase;
+            transition: transform 0.1s ease;
+        }
+
+        .btn-action:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .games-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .game-card {
+            background: #252636;
+            border: 3px solid #000;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            box-shadow: 4px 4px 0px #000;
+        }
+
+        .game-icon-frame {
+            width: 128px;
+            height: 128px;
+            min-width: 128px;
+            min-height: 128px;
+            background: #1a1a24;
+            border: 2px solid #000;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .game-icon-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .game-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .game-title {
+            font-size: 18px;
+            margin: 0;
+            color: #fff;
+        }
+
+        .game-meta {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 2px solid #000;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .btn-edit { background: #5ec8ff; color: #000; }
+        .btn-launch { background: #55ff55; color: #000; }
+
+        .load-more-btn {
+            background: #ffcc00;
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            text-transform: uppercase;
+            width: 100%;
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #252636;
+            border: 3px solid #000;
+            border-radius: 14px;
+            box-shadow: 5px 5px 0px #000;
+            width: 100%;
+            max-width: 460px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            color: #fff;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #1a1a24;
+            color: #fff;
+            font-size: 13px;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+        }
+
+        .validation-msg {
+            font-size: 11px;
+            color: #ff6b6b;
+            display: none;
+        }
+
+        .preview-container {
+            display: none;
+            text-align: center;
+            padding: 8px;
+            background: #1a1a24;
+            border: 2px solid #000;
+            border-radius: 8px;
+        }
+
+        .preview-container img {
+            width: 128px;
+            height: 128px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #000;
+        }
+
+        .notice-box {
+            background: #1a1a24;
+            border: 2px solid #ffcc00;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body onload="initCreateApp()">
+
+    <div class="container">
+        <div class="header-card">
+            <h1 class="app-title">DEV WORLD CREATE</h1>
+            <div class="user-tag-row">
+                <span class="user-tag" id="user-display">Connecting...</span>
+                <button class="btn-sm btn-edit" onclick="openSettingsModal()" style="padding: 8px 12px;">⚙️ Settings</button>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2 style="margin:0; font-size: 18px; color:#fff;">MY PROJECTS</h2>
+            <button class="btn-action" onclick="openNewGameModal()">+ New Project</button>
+        </div>
+
+        <div class="games-list" id="games-list-container">
+            <div style="text-align:center; padding: 20px; color: #aaa;">Loading creator workspace...</div>
+        </div>
+
+        <button id="load-more-btn" class="load-more-btn" onclick="showNextGames()">Show More Projects</button>
+    </div>
+
+    <!-- Edit / Create Game Modal -->
+    <div class="modal-overlay" id="gameEditorModal">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 id="modal-heading" style="margin:0; font-size:18px;">Edit Game</h3>
+                <button class="btn-sm" style="background:#ff6b6b; color:#fff;" onclick="closeEditorModal()">X</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px;">Game Name:</label>
+                <input type="text" id="game-name-input" class="input-field" placeholder="Enter game title..." />
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px;">Custom Game Icon URL (.png, .jpg, .jpeg, .gif):</label>
+                <input type="text" id="game-icon-input" class="input-field" placeholder="https://raw.githubusercontent.com/.../icon.png" oninput="validateIconUrl()" />
+                <span id="validation-error" class="validation-msg">Invalid format! Only .gif, .png, .jpg, and .jpeg are allowed.</span>
+            </div>
+
+            <div class="notice-box">
+                💡 <strong>Icon Spec:</strong> Recommended 128x128 resolution. Icons can be hosted directly via your GitHub repository.
+            </div>
+
+            <div class="preview-container" id="icon-preview-wrapper">
+                <div style="font-size:10px; margin-bottom:4px; color:#aaa;">ICON PREVIEW (128x128)</div>
+                <img id="icon-preview-img" src="" alt="Icon Preview">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:5px;">
+                <button class="btn-sm" style="flex:1; background:#ff6b6b; color:#fff;" onclick="closeEditorModal()">Cancel</button>
+                <button id="save-project-btn" class="btn-action" style="flex:1;" onclick="saveProject()">Save Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; font-size:18px;">Creator Settings</h3>
+                <button class="btn-sm" style="background:#ff6b6b; color:#fff;" onclick="closeSettingsModal()">X</button>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-size:12px;">Update Username:</label>
+                <input type="text" id="settings-username-input" class="input-field" placeholder="Enter new username..." />
+            </div>
+            <div style="display:flex; gap:10px; margin-top:5px;">
+                <button class="btn-sm" style="flex:1; background:#ff6b6b; color:#fff;" onclick="closeSettingsModal()">Cancel</button>
+                <button class="btn-action" style="flex:1;" onclick="saveSettingsUsername()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlHHkVs9AVAAknCAMknG_dAYzAIU9eGSA",
+            authDomain: "dev-world-c65f5.firebaseapp.com",
+            projectId: "dev-world-c65f5",
+            storageBucket: "dev-world-c65f5.firebasestorage.app",
+            messagingSenderId: "961103609829",
+            appId: "1:961103609829:web:ea87f9d0eb63dfde13790c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+        db.settings({ experimentalForceLongPolling: true });
+
+        const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif'];
+        const DEFAULT_ICON = "https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/Untitled338_20260812133205.png";
+
+        let activeUser = null;
+        let cachedUsername = "Developer";
+        let cachedGames = [];
+        let currentGameIndex = 0;
+        const PAGE_SIZE = 3;
+        let currentEditingGameId = null;
+
+        function validateIconUrl() {
+            const input = document.getElementById('game-icon-input').value.trim();
+            const errorSpan = document.getElementById('validation-error');
+            const previewWrapper = document.getElementById('icon-preview-wrapper');
+            const previewImg = document.getElementById('icon-preview-img');
+            const saveBtn = document.getElementById('save-project-btn');
+
+            if (!input) {
+                errorSpan.style.display = 'none';
+                previewWrapper.style.display = 'none';
+                saveBtn.disabled = false;
+                return true;
+            }
+
+            const cleanUrl = input.split('?')[0].split('#')[0].toLowerCase();
+            const isValid = ALLOWED_EXTENSIONS.some(ext => cleanUrl.endsWith(ext));
+
+            if (!isValid) {
+                errorSpan.style.display = 'block';
+                previewWrapper.style.display = 'none';
+                saveBtn.disabled = true;
+                return false;
+            } else {
+                errorSpan.style.display = 'none';
+                previewImg.src = input;
+                previewWrapper.style.display = 'block';
+                saveBtn.disabled = false;
+                return true;
+            }
+        }
+
+        async function fetchUsername(user) {
+            try {
+                const userDoc = await db.collection("users").doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    cachedUsername = data.Username || data.username || user.displayName || user.email.split('@')[0];
+                } else {
+                    const qSnap = await db.collection("users").where("uid", "==", user.uid).get();
+                    if (!qSnap.empty) {
+                        const data = qSnap.docs[0].data();
+                        cachedUsername = data.Username || data.username || user.displayName || user.email.split('@')[0];
+                    } else {
+                        cachedUsername = user.displayName || user.email.split('@')[0];
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching username:", err);
+                cachedUsername = user.displayName || user.email.split('@')[0];
+            }
+            document.getElementById('user-display').innerText = `@${cachedUsername}`;
+        }
+
+        function initCreateApp() {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                activeUser = user;
+                const userDisplay = document.getElementById('user-display');
+
+                if (user) {
+                    await fetchUsername(user);
+                    await loadUserGames(user.uid);
+                } else {
+                    userDisplay.innerText = "Not Logged In";
+                    document.getElementById('games-list-container').innerHTML = 
+                        '<div style="text-align:center; padding:20px; color:#ff6b6b;">Please log in through Dev World to access Dev World CREATE.</div>';
+                }
+            });
+        }
+
+        async function loadUserGames(uid) {
+            const gamesContainer = document.getElementById("games-list-container");
+            gamesContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa;">Loading your projects...</div>';
+
+            try {
+                const gameSnap = await db.collection("games").where("authorId", "==", uid).get();
+                cachedGames = [];
+                gameSnap.forEach(doc => {
+                    cachedGames.push({ id: doc.id, ...doc.data() });
+                });
+
+                currentGameIndex = 0;
+                renderGamesChunk();
+            } catch (err) {
+                console.error("Error loading games:", err);
+                gamesContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#ff6b6b;">Failed to load creator projects.</div>';
+            }
+        }
+
+        function renderGamesChunk() {
+            const gamesContainer = document.getElementById("games-list-container");
+            const showNextBtn = document.getElementById("load-more-btn");
+
+            if (cachedGames.length === 0) {
+                gamesContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#aaa;">No projects found in your games collection. Click "+ New Project" to start building!</div>';
+                showNextBtn.style.display = "none";
+                return;
+            }
+
+            if (currentGameIndex === 0) {
+                gamesContainer.innerHTML = "";
+            }
+
+            const chunk = cachedGames.slice(currentGameIndex, currentGameIndex + PAGE_SIZE);
+            chunk.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.id = `game-card-${game.id}`;
+
+                let iconSrc = DEFAULT_ICON;
+                if (game.iconUrl && typeof game.iconUrl === 'string') {
+                    const cleanUrl = game.iconUrl.split('?')[0].split('#')[0].toLowerCase();
+                    if (ALLOWED_EXTENSIONS.some(ext => cleanUrl.endsWith(ext))) {
+                        iconSrc = game.iconUrl;
+                    }
+                }
+
+                card.innerHTML = `
+                    <div class="game-icon-frame">
+                        <img src="${iconSrc}" alt="Game Icon" onerror="this.src='${DEFAULT_ICON}'" />
+                    </div>
+                    <div class="game-info">
+                        <h3 class="game-title">${game.title || "Untitled Game"}</h3>
+                        <div class="game-meta">ID: ${game.id}</div>
+                        <div class="game-controls">
+                            <button class="btn-sm btn-edit" onclick="openEditGameModal('${game.id}', '${(game.title || '').replace(/'/g, "\\'")}', '${(game.iconUrl || '').replace(/'/g, "\\'")}')">Edit Info</button>
+                            <button class="btn-sm btn-launch" onclick="launchEditor('${game.id}')">Open Editor</button>
+                        </div>
+                    </div>
+                `;
+
+                gamesContainer.appendChild(card);
+            });
+
+            currentGameIndex += PAGE_SIZE;
+
+            if (currentGameIndex < cachedGames.length) {
+                showNextBtn.style.display = "block";
+            } else {
+                showNextBtn.style.display = "none";
+            }
+        }
+
+        function showNextGames() {
+            renderGamesChunk();
+        }
+
+        function openNewGameModal() {
+            currentEditingGameId = null;
+            document.getElementById('modal-heading').innerText = "New Project";
+            document.getElementById('game-name-input').value = "";
+            document.getElementById('game-icon-input').value = "";
+            validateIconUrl();
+            document.getElementById('gameEditorModal').style.display = 'flex';
+        }
+
+        function openEditGameModal(gameId, title, iconUrl) {
+            currentEditingGameId = gameId;
+            document.getElementById('modal-heading').innerText = "Manage Project";
+            document.getElementById('game-name-input').value = title;
+            document.getElementById('game-icon-input').value = iconUrl;
+            validateIconUrl();
+            document.getElementById('gameEditorModal').style.display = 'flex';
+        }
+
+        function closeEditorModal() {
+            document.getElementById('gameEditorModal').style.display = 'none';
+            currentEditingGameId = null;
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settings-username-input').value = cachedUsername;
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        async function saveSettingsUsername() {
+            if (!activeUser) return;
+            const newUsername = document.getElementById('settings-username-input').value.trim();
+            if (!newUsername) {
+                alert("Username cannot be empty.");
+                return;
+            }
+
+            try {
+                await db.collection("users").doc(activeUser.uid).set({
+                    Username: newUsername,
+                    username: newUsername,
+                    uid: activeUser.uid
+                }, { merge: true });
+
+                cachedUsername = newUsername;
+                document.getElementById('user-display').innerText = `@${cachedUsername}`;
+                alert("Username updated successfully!");
+                closeSettingsModal();
+            } catch (err) {
+                console.error("Error updating username:", err);
+                alert("Failed to update username: " + err.message);
+            }
+        }
+
+        async function saveProject() {
+            if (!activeUser) return;
+
+            const nameInput = document.getElementById('game-name-input').value.trim();
+            const iconInput = document.getElementById('game-icon-input').value.trim();
+
+            if (!nameInput) {
+                alert("Please enter a game name.");
+                return;
+            }
+
+            if (!validateIconUrl()) {
+                alert("Invalid image link. Only .gif, .png, .jpg, and .jpeg files are accepted.");
+                return;
+            }
+
+            try {
+                if (currentEditingGameId) {
+                    await db.collection("games").doc(currentEditingGameId).update({
+                        title: nameInput,
+                        iconUrl: iconInput || null,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    await db.collection("games").add({
+                        authorId: activeUser.uid,
+                        title: nameInput,
+                        iconUrl: iconInput || null,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                closeEditorModal();
+                await loadUserGames(activeUser.uid);
+            } catch (err) {
+                console.error("Error saving game project:", err);
+                alert("Failed to save project: " + err.message);
+            }
+        }
+
+        function launchEditor(gameId) {
+            window.location.href = `editor.html?gameId=${gameId}`;
+        }
+    </script>
+</body>
+</html>

@@ -275,7 +275,7 @@
             gap: 8px;
         }
 
-        .like-btn, .report-btn {
+        .like-btn, .report-btn, .admin-delete-post-btn {
             display: flex;
             align-items: center;
             gap: 5px;
@@ -290,7 +290,8 @@
 
         .like-btn { background: #e9ecef; }
         .report-btn { background: #ffcc00; color: #000; }
-        .report-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
+        .admin-delete-post-btn { background: #ff595e; color: #fff; }
+        .report-btn:active, .admin-delete-post-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
 
         .like-icon {
             width: 16px;
@@ -477,6 +478,19 @@
         </div>
     </div>
 
+    <!-- Admin Delete Post Modal -->
+    <div class="modal-overlay" id="adminDeletePostModal">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 class="modal-title" style="margin:0; color:#ff595e;">Admin Delete Post</h3>
+                <button class="btn-cancel" onclick="closeAdminDeleteModal()">X</button>
+            </div>
+            <p style="font-size:12px; margin:0;">Enter how many Dev Points to deduct from the author:</p>
+            <input type="number" id="deduct-points-input" class="input-field" value="10" min="0" max="100">
+            <button class="btn-upload" style="background:#ff595e; color:#fff;" onclick="confirmAdminDeletePost()">Delete Post & Deduct Points</button>
+        </div>
+    </div>
+
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
         <a href="wallet.html" class="nav-item">
@@ -529,6 +543,7 @@
         let lastVisibleDoc = null;
         let isInitialLoad = true;
         let currentReportingPost = null;
+        let currentAdminDeletingPost = null;
 
         async function getCreatorUsername(authorId) {
             if (!authorId) return "Unknown";
@@ -583,6 +598,17 @@
         function closeReportModal() {
             document.getElementById('reportPostModal').style.display = 'none';
             currentReportingPost = null;
+        }
+
+        function openAdminDeleteModal(postId, authorId) {
+            currentAdminDeletingPost = { postId, authorId };
+            document.getElementById('deduct-points-input').value = '10';
+            document.getElementById('adminDeletePostModal').style.display = 'flex';
+        }
+
+        function closeAdminDeleteModal() {
+            document.getElementById('adminDeletePostModal').style.display = 'none';
+            currentAdminDeletingPost = null;
         }
 
         async function submitReport() {
@@ -761,6 +787,50 @@
             }
         }
 
+        // Admin post deletion handling custom dev points deduction and ban flag
+        async function confirmAdminDeletePost() {
+            if (!currentAdminDeletingPost) return;
+            const adminUid = 'ccZGPg7EzbNphnL0du3msMFIpjJ3';
+            if (!activeAuthUser || activeAuthUser.uid !== adminUid) {
+                alert("Unauthorized action.");
+                closeAdminDeleteModal();
+                return;
+            }
+
+            const deductAmount = parseInt(document.getElementById('deduct-points-input').value, 10);
+            if (isNaN(deductAmount) || deductAmount < 0) {
+                alert("Please enter a valid number of points.");
+                return;
+            }
+
+            const { postId, authorId } = currentAdminDeletingPost;
+
+            try {
+                await db.collection("posts").doc(postId).delete();
+
+                const targetUserRef = db.collection("users").doc(authorId);
+                await db.runTransaction(async (transaction) => {
+                    const userDoc = await transaction.get(targetUserRef);
+                    let currentPoints = 100;
+                    if (userDoc.exists && userDoc.data().devPoints !== undefined) {
+                        currentPoints = userDoc.data().devPoints;
+                    }
+                    const newPoints = Math.max(0, currentPoints - deductAmount);
+                    let updatePayload = { devPoints: newPoints };
+                    if (newPoints <= 79) {
+                        updatePayload.isBanned = true;
+                    }
+                    transaction.set(targetUserRef, updatePayload, { merge: true });
+                });
+
+                alert(`Post deleted by admin. Author Dev Points reduced by ${deductAmount}.`);
+                closeAdminDeleteModal();
+                resetAndLoadPosts();
+            } catch (err) {
+                alert("Failed to delete post: " + err.message);
+            }
+        }
+
         async function submitComment(postId) {
             if (!activeAuthUser) {
                 alert("You must be logged in to comment.");
@@ -853,6 +923,9 @@
 
                 lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
 
+                const adminUid = 'ccZGPg7EzbNphnL0du3msMFIpjJ3';
+                const isAdmin = activeAuthUser && activeAuthUser.uid === adminUid;
+
                 for (let docSnap of snapshot.docs) {
                     const post = docSnap.data();
                     const postId = docSnap.id;
@@ -901,12 +974,21 @@
                     likeBtn.innerHTML = `<img src="like.png" alt="Like" class="like-icon"> ${likesCount}`;
                     likeBtn.onclick = () => toggleLike(postId);
 
+                    actionsDiv.appendChild(likeBtn);
+
+                    if (isAdmin) {
+                        const adminDeleteBtn = document.createElement('button');
+                        adminDeleteBtn.className = 'admin-delete-post-btn';
+                        adminDeleteBtn.innerText = 'Delete Post';
+                        adminDeleteBtn.onclick = () => openAdminDeleteModal(postId, post.authorId);
+                        actionsDiv.appendChild(adminDeleteBtn);
+                    }
+
                     const reportBtn = document.createElement('button');
                     reportBtn.className = 'report-btn';
                     reportBtn.innerText = 'Report';
                     reportBtn.onclick = () => openReportModal(postId, post.text, post.authorId, authorName);
 
-                    actionsDiv.appendChild(likeBtn);
                     actionsDiv.appendChild(reportBtn);
                     postCard.appendChild(actionsDiv);
 

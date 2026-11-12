@@ -371,6 +371,9 @@
         const db = firebase.firestore();
         db.settings({ experimentalForceLongPolling: true });
 
+        const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif'];
+        const DEFAULT_ICON = 'gameres.png';
+
         async function searchUser() {
             const queryName = document.getElementById('search-username-input').value.trim();
             if (!queryName) {
@@ -418,9 +421,20 @@
                     card.href = `play.html?id=${gameId}`;
 
                     const img = document.createElement('img');
-                    img.src = 'gameres.png';
+                    
+                    // Validate custom icon URL from Dev World CREATE using allowed extensions check
+                    let iconSrc = DEFAULT_ICON;
+                    if (game.iconUrl && typeof game.iconUrl === 'string') {
+                        const cleanUrl = game.iconUrl.split('?')[0].split('#')[0].toLowerCase();
+                        if (ALLOWED_EXTENSIONS.some(ext => cleanUrl.endsWith(ext))) {
+                            iconSrc = game.iconUrl;
+                        }
+                    }
+
+                    img.src = iconSrc;
                     img.alt = game.title || "Game Icon";
                     img.className = 'game-card-img';
+                    img.onerror = () => { img.src = DEFAULT_ICON; };
 
                     const titleDiv = document.createElement('div');
                     titleDiv.className = 'game-card-title';
