@@ -1,0 +1,186 @@
+name: Build Android Release
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Java (JDK 21)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Dependencies
+        run: |
+          npm install
+
+      - name: Organize Web Files for Capacitor
+        run: |
+          mkdir -p www
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'android' ! -name 'www' ! -name 'package.json' ! -name 'package-lock.json' ! -name 'icon.png' -exec mv -t www/ {} +
+
+      - name: Initialize Capacitor and Add Android
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "Dev World" com.devworld.app --web-dir www
+          npx cap add android
+
+      - name: Set App Version to 0.1.6
+        run: |
+          python3 -c "
+          build_path = 'android/app/build.gradle'
+          with open(build_path, 'r') as f:
+              content = f.read()
+          
+          if 'versionName' in content:
+              import re
+              content = re.sub(r'versionName \"[^\"]+\"', 'versionName \"0.2.0-stable01\"', content)
+              content = re.sub(r'versionCode \d+', 'versionCode 6', content)
+          
+          with open(build_path, 'w') as f:
+              f.write(content)
+          print('Successfully updated build.gradle version to 0.1.6!')
+          "
+
+      - name: Process and Apply Full App Icon Set via Python (with Zoom Fix)
+        run: |
+          pip install Pillow
+          python3 -c "
+          import os
+          from PIL import Image
+
+          icon_path = 'icon.png'
+          if os.path.exists(icon_path):
+              img = Image.open(icon_path).convert('RGBA')
+              
+              sizes = {
+                  'mipmap-mdpi': 48,
+                  'mipmap-hdpi': 72,
+                  'mipmap-xhdpi': 96,
+                  'mipmap-xxhdpi': 144,
+                  'mipmap-xxxhdpi': 192
+              }
+              
+              base_dir = 'android/app/src/main/res'
+              
+              # 1. Generate standard legacy icons (fill full size)
+              for folder, size in sizes.items():
+                  res_dir = os.path.join(base_dir, folder)
+                  os.makedirs(res_dir, exist_ok=True)
+                  
+                  resized = img.resize((size, size), Image.Resampling.LANCZOS)
+                  resized.save(os.path.join(res_dir, 'ic_launcher.png'), 'PNG')
+                  resized.save(os.path.join(res_dir, 'ic_launcher_round.png'), 'PNG')
+
+              # 2. Generate adaptive layers with safe-zone padding (prevents zoom/clipping)
+              adaptive_sizes = {
+                  'mipmap-mdpi': 108,
+                  'mipmap-hdpi': 162,
+                  'mipmap-xhdpi': 216,
+                  'mipmap-xxhdpi': 324,
+                  'mipmap-xxxhdpi': 432
+              }
+              
+              for folder, size in adaptive_sizes.items():
+                  res_dir = os.path.join(base_dir, folder)
+                  os.makedirs(res_dir, exist_ok=True)
+                  
+                  # Create a transparent canvas for the foreground
+                  foreground = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+                  
+                  # Scale down image to ~72% to fit inside the Android safe zone
+                  inner_size = int(size * 0.72)
+                  offset = (size - inner_size) // 2
+                  
+                  resized_fg = img.resize((inner_size, inner_size), Image.Resampling.LANCZOS)
+                  foreground.paste(resized_fg, (offset, offset), resized_fg)
+                  foreground.save(os.path.join(res_dir, 'ic_launcher_foreground.png'), 'PNG')
+                  
+                  # Solid background layer
+                  bg_img = Image.new('RGBA', (size, size), (255, 255, 255, 255))
+                  bg_img.save(os.path.join(res_dir, 'ic_launcher_background.png'), 'PNG')
+
+              # 3. Create anydpi-v26 xml definitions
+              anydpi_dir = os.path.join(base_dir, 'mipmap-anydpi-v26')
+              os.makedirs(anydpi_dir, exist_ok=True)
+              
+              xml_content = '''<?xml version=\"1.0\" encoding=\"utf-8\"?>
+              <adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">
+                  <background android:drawable=\"@mipmap/ic_launcher_background\"/>
+                  <foreground android:drawable=\"@mipmap/ic_launcher_foreground\"/>
+              </adaptive-icon>'''
+              
+              with open(os.path.join(anydpi_dir, 'ic_launcher.xml'), 'w') as f:
+                  f.write(xml_content)
+              with open(os.path.join(anydpi_dir, 'ic_launcher_round.xml'), 'w') as f:
+                  f.write(xml_content)
+
+              print('Successfully generated padded adaptive icons and fixed zoom issue!')
+          else:
+              print('icon.png not found.')
+          "
+
+      - name: Sync Capacitor
+        run: |
+          npx cap sync
+
+      - name: Decode Release Keystore from GitHub Secrets
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/devworldrelease.jks
+
+      - name: Inject Signing Configuration into Gradle
+        run: |
+          echo "" >> android/app/build.gradle
+          echo "android {" >> android/app/build.gradle
+          echo "    signingConfigs {" >> android/app/build.gradle
+          echo "        release {" >> android/app/build.gradle
+          echo "            storeFile file('devworldrelease.jks')" >> android/app/build.gradle
+          echo "            storePassword '${{ secrets.RELEASE_KEYSTORE_PASSWORD }}'" >> android/app/build.gradle
+          echo "            keyAlias '${{ secrets.RELEASE_KEY_ALIAS }}'" >> android/app/build.gradle
+          echo "            keyPassword '${{ secrets.RELEASE_KEY_PASSWORD }}'" >> android/app/build.gradle
+          echo "        }" >> android/app/build.gradle
+          echo "    }" >> android/app/build.gradle
+          echo "    buildTypes {" >> android/app/build.gradle
+          echo "        release {" >> android/app/build.gradle
+          echo "            signingConfig signingConfigs.release" >> android/app/build.gradle
+          echo "        }" >> android/app/build.gradle
+          echo "    }" >> android/app/build.gradle
+          echo "}" >> android/app/build.gradle
+
+      - name: Fix Kotlin Version Conflicts
+        run: |
+          echo "" >> android/build.gradle
+          echo "subprojects {" >> android/build.gradle
+          echo "    configurations.all {" >> android/build.gradle
+          echo "        resolutionStrategy.eachDependency { details ->" >> android/build.gradle
+          echo "            if (details.requested.group == 'org.jetbrains.kotlin') {" >> android/build.gradle
+          echo "                details.useVersion '1.9.0'" >> android/build.gradle
+          echo "            }" >> android/build.gradle
+          echo "        }" >> android/build.gradle
+          echo "    }" >> android/build.gradle
+          echo "}" >> android/build.gradle
+
+      - name: Build Signed Release APK (Gradle)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Upload Signed APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DevWorldApp
+          path: android/app/build/outputs/apk/**/*.apk
+          
