@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - Dev World</title>
+    <title>My Profile - Dev World (v0.3.0.1)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
@@ -110,6 +110,27 @@
             text-align: center;
             font-size: 22px;
             margin: 0 0 5px 0;
+        }
+
+        /* Badge Styling */
+        .badges-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .user-badge {
+            background-color: #343a40;
+            color: #ffffff;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1.5px solid #000;
+            letter-spacing: 0.5px;
+            text-transform: lowercase;
+            box-shadow: 1px 1px 0px #000;
         }
 
         .uid-badge {
@@ -315,6 +336,8 @@
             max-width: 380px;
             padding: 30px 20px;
             text-align: center;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .user-list-popup {
@@ -397,6 +420,38 @@
             margin-top: 10px;
             line-height: 1.4;
         }
+
+        /* Admin Badge Management Section inside Modal */
+        .admin-badge-section {
+            border-top: 2px dashed #000;
+            margin-top: 15px;
+            padding-top: 15px;
+            text-align: left;
+        }
+        .admin-badge-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .badge-chip {
+            background: #e9ecef;
+            border: 1.5px solid #000;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-remove-btn {
+            background: #ff595e;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            padding: 1px 4px;
+        }
     </style>
 </head>
 <body>
@@ -423,6 +478,10 @@
         </div>
         
         <h3 id="welcome-user" class="header-title">Loading...</h3>
+        
+        <!-- Badges Display Area -->
+        <div id="profile-badges-container" class="badges-container"></div>
+
         <div id="uid-display" class="uid-badge">ID: Loading...</div>
         
         <div class="social-stats">
@@ -468,7 +527,17 @@
             <label class="label-title" style="text-align: left;">BIO</label>
             <textarea id="bio-input" class="input-field" rows="3" placeholder="Tell us about yourself..."></textarea>
             
-            <button id="save-btn" class="btn-custom btn-save">Save Profile</button>
+            <!-- Admin Badge Management Section (Only visible for admin ID ccZGPg7EzbNphnL0du3msMFIpjJ3) -->
+            <div id="admin-badge-management" class="admin-badge-section" style="display: none;">
+                <label class="label-title" style="text-align: left; color: #c92a2a;">ADMIN: MANAGE BADGES</label>
+                <div id="current-user-badges-list" style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;"></div>
+                <div class="admin-badge-row">
+                    <input type="text" id="new-badge-input" class="input-field" placeholder="e.g. developer, moderator" style="margin-bottom: 0;">
+                    <button class="btn-custom" style="width: auto; margin-bottom: 0; padding: 0 12px; background: #a1ffe4;" onclick="adminAddBadge()">Add</button>
+                </div>
+            </div>
+
+            <button id="save-btn" class="btn-custom btn-save" style="margin-top: 15px;">Save Profile</button>
             <button class="btn-custom" style="background: #e9ecef; color: #000; margin-bottom: 0;" onclick="closeEditProfileModal()">Close</button>
         </div>
     </div>
@@ -540,6 +609,7 @@
         const db = firebase.firestore();
         db.settings({ experimentalForceLongPolling: true });
 
+        const ADMIN_UID = "ccZGPg7EzbNphnL0du3msMFIpjJ3";
         let currentUserData = null;
         let cachedGames = [];
         let cachedPosts = [];
@@ -587,13 +657,17 @@
                 document.getElementById("uid-display").innerText = "ID: " + user.uid;
                 const userDocRef = db.collection("users").doc(user.uid);
 
+                // Show admin badge manager if logged in as admin
+                if (user.uid === ADMIN_UID) {
+                    document.getElementById("admin-badge-management").style.display = "block";
+                }
+
                 userDocRef.get().then((doc) => {
                     if (doc.exists) {
                         currentUserData = doc.data();
                         
                         let devPoints = currentUserData.devPoints !== undefined ? currentUserData.devPoints : 100;
 
-                        // Automatic ban check if dev points drop into banned range (79 to 0) -> sets isBanned to true
                         if (devPoints <= 79) {
                             userDocRef.set({ isBanned: true }, { merge: true }).then(() => {
                                 alert("Your account has been banned. reason: dev points = " + devPoints + ".");
@@ -604,20 +678,19 @@
                             return;
                         }
 
-                        // Populate the Dev Points modal status display with plain colored text (no background, no emojis)
                         const modalDisplay = document.getElementById("modal-dev-points-display");
 
                         if (devPoints === 100) {
-                            modalDisplay.style.color = "#2b8a3e"; // Green
+                            modalDisplay.style.color = "#2b8a3e";
                             modalDisplay.innerText = `${devPoints}`;
                         } else if (devPoints >= 90 && devPoints <= 99) {
-                            modalDisplay.style.color = "#f59f00"; // Yellow
+                            modalDisplay.style.color = "#f59f00";
                             modalDisplay.innerText = `${devPoints}`;
                         } else if (devPoints >= 80 && devPoints <= 89) {
-                            modalDisplay.style.color = "#d9480f"; // Orange
+                            modalDisplay.style.color = "#d9480f";
                             modalDisplay.innerText = `${devPoints}`;
                         } else {
-                            modalDisplay.style.color = "#c92a2a"; // Red
+                            modalDisplay.style.color = "#c92a2a";
                             modalDisplay.innerText = `${devPoints}`;
                         }
 
@@ -630,9 +703,11 @@
                         if (currentUserData.isBanned === undefined) { updateData.isBanned = false; needsUpdate = true; }
                         if (currentUserData.pfpUrl === undefined) { updateData.pfpUrl = ""; needsUpdate = true; }
                         if (currentUserData.profileColor === undefined) { updateData.profileColor = "#ffffff"; needsUpdate = true; }
+                        if (!currentUserData.badges) { updateData.badges = []; needsUpdate = true; }
 
                         if (needsUpdate) {
                             userDocRef.set(updateData, { merge: true });
+                            currentUserData.badges = currentUserData.badges || [];
                         }
 
                         document.getElementById("username-input").value = currentUserData.Username || "";
@@ -641,10 +716,8 @@
                         document.getElementById("profile-color-input").value = currentUserData.profileColor || "#ffffff";
                         document.getElementById("welcome-user").innerText = currentUserData.Username || "Creator Profile";
                         
-                        // Set main profile card background color
                         document.getElementById("main-profile-container").style.backgroundColor = currentUserData.profileColor || "#ffffff";
 
-                        // Set profile picture or default to people.png
                         const pfpImg = document.getElementById("profile-pfp-display");
                         if (currentUserData.pfpUrl && currentUserData.pfpUrl.trim() !== "") {
                             pfpImg.src = currentUserData.pfpUrl;
@@ -654,6 +727,9 @@
 
                         document.getElementById("followers-count").innerText = (currentUserData.followers || []).length;
                         document.getElementById("following-count").innerText = (currentUserData.following || []).length;
+
+                        renderBadgesUI(currentUserData.badges || []);
+                        renderAdminBadgesManager(currentUserData.badges || []);
                     } else {
                         currentUserData = {
                             Username: "DevWorldUser",
@@ -663,12 +739,15 @@
                             devPoints: 100,
                             isBanned: false,
                             pfpUrl: "",
-                            profileColor: "#ffffff"
+                            profileColor: "#ffffff",
+                            badges: []
                         };
                         userDocRef.set(currentUserData, { merge: true });
                         document.getElementById("welcome-user").innerText = "DevWorldUser";
                         document.getElementById("profile-pfp-display").src = "people.png";
                         document.getElementById("main-profile-container").style.backgroundColor = "#ffffff";
+                        renderBadgesUI([]);
+                        renderAdminBadgesManager([]);
                     }
                 });
 
@@ -677,6 +756,71 @@
                 window.location.href = "index.html";
             }
         });
+
+        function renderBadgesUI(badges) {
+            const container = document.getElementById("profile-badges-container");
+            container.innerHTML = "";
+            badges.forEach(badge => {
+                const badgeEl = document.createElement("span");
+                badgeEl.className = "user-badge";
+                badgeEl.innerText = badge;
+                container.appendChild(badgeEl);
+            });
+        }
+
+        function renderAdminBadgesManager(badges) {
+            const listEl = document.getElementById("current-user-badges-list");
+            listEl.innerHTML = "";
+            if (badges.length === 0) {
+                listEl.innerHTML = '<span style="font-size:11px; color:#666;">No badges assigned.</span>';
+                return;
+            }
+            badges.forEach((badge, index) => {
+                const chip = document.createElement("div");
+                chip.className = "badge-chip";
+                chip.innerHTML = `<span>${badge}</span><button class="badge-remove-btn" onclick="adminRemoveBadge(${index})">X</button>`;
+                listEl.appendChild(chip);
+            });
+        }
+
+        async function adminAddBadge() {
+            const input = document.getElementById("new-badge-input");
+            const val = input.value.trim().toLowerCase();
+            if (!val) return;
+
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            if (!currentUserData.badges) currentUserData.badges = [];
+            if (currentUserData.badges.includes(val)) {
+                alert("User already has this badge.");
+                return;
+            }
+
+            currentUserData.badges.push(val);
+            try {
+                await db.collection("users").doc(user.uid).update({ badges: currentUserData.badges });
+                input.value = "";
+                renderBadgesUI(currentUserData.badges);
+                renderAdminBadgesManager(currentUserData.badges);
+            } catch (err) {
+                alert("Error adding badge: " + err.message);
+            }
+        }
+
+        async function adminRemoveBadge(index) {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            currentUserData.badges.splice(index, 1);
+            try {
+                await db.collection("users").doc(user.uid).update({ badges: currentUserData.badges });
+                renderBadgesUI(currentUserData.badges);
+                renderAdminBadgesManager(currentUserData.badges);
+            } catch (err) {
+                alert("Error removing badge: " + err.message);
+            }
+        }
 
         async function openFollowersModal() {
             if (!currentUserData) return;
@@ -821,10 +965,8 @@
             renderGamesChunk();
         }
 
-        // Admin game deletion handling dev points deduction and ban flag
         async function deleteGame(gameId, currentAuthUid, authorId) {
-            const adminUid = 'ccZGPg7EzbNphnL0du3msMFIpjJ3';
-            const isAdmin = (currentAuthUid === adminUid);
+            const isAdmin = (currentAuthUid === ADMIN_UID);
 
             let confirmMsg = isAdmin && currentAuthUid !== authorId ? 
                 "Admin Action: Delete this user's game and deduct 10 Dev Points?" : 

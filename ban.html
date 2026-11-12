@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Banned - Dev World</title>
+    <title>Account Suspended - Dev World</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,15 +11,20 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
-        * { box-sizing: border-box; user-select: none; }
+        * { box-sizing: border-box; }
         body, html {
             width: 100%;
             height: 100vh;
             margin: 0;
             padding: 0;
-            background-color: #87f2b7;
+            background-color: #5ce1e6;
+            background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -27,96 +32,117 @@
             font-family: 'Cherry Bomb One', cursive, sans-serif;
         }
 
-        .mobile-app-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: none;
-            max-height: none;
-            background-color: #87f2b7;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-y: auto;
-            border: none;
-            box-shadow: none;
-            padding: 30px 20px;
-            text-align: center;
-        }
-
         .clouds-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed;
+            top: 0; left: 0;
+            width: 200%; height: 200%;
             background-image: url('https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/Untitled338_20260812133205.png?raw=true');
-            background-repeat: repeat;
-            background-size: 400px;
-            opacity: 0.2;
+            background-repeat: repeat-x;
+            background-size: contain;
+            opacity: 0.8;
             pointer-events: none;
             z-index: 1;
         }
 
-        .ban-content {
+        .main-container {
             position: relative;
             z-index: 2;
+            width: 90%;
+            max-width: 420px;
+            background: #ffffff;
+            border: 4px solid #000000;
+            border-radius: 20px;
+            box-shadow: 0 8px 0px #000000;
+            padding: 30px 20px;
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
-            width: 100%;
         }
 
         .ban-img {
-            max-width: 200px;
-            width: 70%;
+            max-width: 80px;
+            width: 100%;
             height: auto;
-            filter: none;
+            display: block;
+            margin: 0 auto 12px auto;
         }
 
-        .ban-text {
+        .header-title {
+            text-align: center;
             font-size: 24px;
             color: #000000;
-            text-shadow: 2px 2px 0px #ffffff;
-            letter-spacing: 1px;
-            margin: 0;
+            margin: 0 0 15px 0;
         }
 
-        .btn-logout {
+        .info-box {
             width: 100%;
-            max-width: 220px;
             padding: 12px;
-            background: #5ce1e6;
-            color: #000000;
-            border: 4px solid #000000;
-            border-radius: 20px;
-            font-family: 'Cherry Bomb One', cursive, sans-serif;
-            font-size: 20px;
-            letter-spacing: 1px;
-            cursor: pointer;
-            box-shadow: 0 4px 0px #000000;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
-            margin-top: 10px;
+            border: 2px solid #000000;
+            border-radius: 10px;
+            background: #f8f9fa;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #212529;
+            box-shadow: 2px 2px 0px #000000;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            line-height: 1.4;
         }
 
-        .btn-logout:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0px #000000;
+        .uid-badge {
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            font-family: monospace;
+            background: #e9ecef;
+            border: 2px dashed #000000;
+            padding: 8px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            box-shadow: 2px 2px 0px #000000;
+        }
+
+        .btn-custom {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #000000;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000000;
+            transition: transform 0.1s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            font-family: 'Cherry Bomb One', cursive, sans-serif;
+            background: #ff595e;
+            color: #ffffff;
+        }
+
+        .btn-custom:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000000;
         }
     </style>
 </head>
 <body>
 
-    <div class="mobile-app-container">
-        <div class="clouds-bg"></div>
+    <div class="clouds-bg"></div>
 
-        <div class="ban-content">
-            <img src="BannedWarning.png" alt="Banned Warning" class="ban-img" onerror="this.src='https://github.com/ThatOneDeveloperDevWorld/devworldsource/blob/main/logo1.png?raw=true'">
-            <p class="ban-text">your account has been banned.</p>
-            <button id="logout-btn" class="btn-logout">LOGOUT</button>
+    <div class="main-container">
+        <img src="bannedwarning.png" alt="Banned Warning" class="ban-img">
+        
+        <h3 class="header-title">Account permenatly banned</h3>
+        
+        <div class="info-box">
+            Your account has been banned.
         </div>
+        
+        <div id="uid-display" class="uid-badge">ID: Loading...</div>
+        
+        <button id="logout-btn" class="btn-custom">Log Out</button>
     </div>
 
     <script>
@@ -132,6 +158,14 @@
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById("uid-display").innerText = "ID: " + user.uid;
+            } else {
+                document.getElementById("uid-display").innerText = "ID: Not Signed In";
+            }
+        });
 
         document.getElementById('logout-btn').addEventListener('click', () => {
             firebase.auth().signOut().then(() => {
