@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - Dev World (v0.3.0.1)</title>
+    <title>My Profile - Dev World</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
@@ -100,7 +100,7 @@
             justify-content: center;
         }
 
-        .profile-pfp-img {
+        .profile-pfp-img, .profile-pfp-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -472,9 +472,9 @@
     </div>
 
     <div id="main-profile-container" class="main-container">
-        <!-- Profile Picture Display (Square) -->
-        <div class="profile-pfp-container">
-            <img id="profile-pfp-display" src="people.png" alt="Profile Picture" class="profile-pfp-img" onerror="this.src='https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/people.png'">
+        <!-- Profile Picture / Video Display Container -->
+        <div id="profile-pfp-container" class="profile-pfp-container">
+            <img id="profile-pfp-display" src="people.png" alt="Profile Picture" class="profile-pfp-img" onerror="this.src='people.png'">
         </div>
         
         <h3 id="welcome-user" class="header-title">Loading...</h3>
@@ -652,6 +652,23 @@
             document.getElementById("settings-modal").classList.remove("active");
         }
 
+        function renderProfileMedia(url) {
+            const container = document.getElementById("profile-pfp-container");
+            const trimmedUrl = url ? url.trim() : "";
+
+            if (trimmedUrl !== "" && (trimmedUrl.toLowerCase().endsWith(".mp4") || trimmedUrl.includes(".mp4?"))) {
+                container.innerHTML = `
+                    <video autoplay loop muted playsinline class="profile-pfp-video" onerror="this.outerHTML='<img id=\\'profile-pfp-display\\' src=\\'people.png\\' alt=\\'Profile Picture\\' class=\\'profile-pfp-img\\' onerror=\\'this.src=\\'people.png\\'\\'>'">
+                        <source src="${trimmedUrl}" type="video/mp4">
+                    </video>
+                `;
+            } else {
+                container.innerHTML = `
+                    <img id="profile-pfp-display" src="${trimmedUrl !== "" ? trimmedUrl : "people.png"}" alt="Profile Picture" class="profile-pfp-img" onerror="this.src='people.png'">
+                `;
+            }
+        }
+
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById("uid-display").innerText = "ID: " + user.uid;
@@ -718,12 +735,7 @@
                         
                         document.getElementById("main-profile-container").style.backgroundColor = currentUserData.profileColor || "#ffffff";
 
-                        const pfpImg = document.getElementById("profile-pfp-display");
-                        if (currentUserData.pfpUrl && currentUserData.pfpUrl.trim() !== "") {
-                            pfpImg.src = currentUserData.pfpUrl;
-                        } else {
-                            pfpImg.src = "people.png";
-                        }
+                        renderProfileMedia(currentUserData.pfpUrl);
 
                         document.getElementById("followers-count").innerText = (currentUserData.followers || []).length;
                         document.getElementById("following-count").innerText = (currentUserData.following || []).length;
@@ -744,7 +756,7 @@
                         };
                         userDocRef.set(currentUserData, { merge: true });
                         document.getElementById("welcome-user").innerText = "DevWorldUser";
-                        document.getElementById("profile-pfp-display").src = "people.png";
+                        renderProfileMedia("");
                         document.getElementById("main-profile-container").style.backgroundColor = "#ffffff";
                         renderBadgesUI([]);
                         renderAdminBadgesManager([]);
@@ -1036,12 +1048,7 @@
                     document.getElementById("welcome-user").innerText = newUsername;
                     document.getElementById("main-profile-container").style.backgroundColor = newProfileColor;
                     
-                    const pfpImg = document.getElementById("profile-pfp-display");
-                    if (newPfpUrl) {
-                        pfpImg.src = newPfpUrl;
-                    } else {
-                        pfpImg.src = "people.png";
-                    }
+                    renderProfileMedia(newPfpUrl);
 
                     if (currentUserData) {
                         currentUserData.Username = newUsername;

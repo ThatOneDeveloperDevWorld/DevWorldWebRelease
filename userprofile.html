@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creator Profile - Dev World (v0.3.0.1)</title>
+    <title>search - dev world</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
@@ -72,7 +72,7 @@
             justify-content: center;
         }
 
-        .profile-pfp-img {
+        .profile-pfp-img, .profile-pfp-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -257,7 +257,7 @@
         .btn-unfollow { background: #ffbe0b; color: #000; }
         .btn-back { background: #ff595e; color: #fff; margin-bottom: 0; }
 
-        /* Admin Badge Management Section on Profile */
+        /* Admin Management Sections on Profile */
         .admin-badge-section {
             border-top: 3px dashed #000;
             margin-top: 25px;
@@ -305,9 +305,9 @@
     <div class="clouds-bg"></div>
 
     <div id="main-profile-container" class="main-container">
-        <!-- Profile Picture Display -->
-        <div class="profile-pfp-container">
-            <img id="profile-pfp-display" src="people.png" alt="Profile Picture" class="profile-pfp-img" onerror="this.src='https://raw.githubusercontent.com/ThatOneDeveloperDevWorld/devworldsource/main/people.png'">
+        <!-- Profile Picture / Video Display Container -->
+        <div id="profile-pfp-container" class="profile-pfp-container">
+            <img id="profile-pfp-display" src="people.png" alt="Profile Picture" class="profile-pfp-img" onerror="this.src='people.png'">
         </div>
 
         <img src="Devworldlogobeta.png" alt="Dev World Logo" class="logo-img" onerror="this.style.display='none'">
@@ -322,6 +322,7 @@
         <div class="social-stats">
             <div><div id="followers-count">0</div><span>Followers</span></div>
             <div><div id="following-count">0</div><span>Following</span></div>
+            <div><div id="dev-points-display">100</div><span>Dev Points</span></div>
         </div>
 
         <label class="label-title">BIO</label>
@@ -341,6 +342,15 @@
             <div class="admin-badge-row">
                 <input type="text" id="new-badge-input" class="input-field" placeholder="e.g. developer, moderator" style="margin-bottom: 0;">
                 <button class="btn-custom" style="width: auto; margin-bottom: 0; padding: 0 16px; background: #a1ffe4;" onclick="adminAddBadge()">Add Badge</button>
+            </div>
+        </div>
+
+        <!-- Admin Dev Points Management Panel (Visible only when logged in as admin UID ccZGPg7EzbNphnL0du3msMFIpjJ3) -->
+        <div id="admin-devpoints-management" class="admin-badge-section" style="display: none;">
+            <label class="label-title" style="color: #c92a2a;">ADMIN: MANAGE DEV POINTS</label>
+            <div class="admin-badge-row">
+                <input type="number" id="admin-devpoints-input" class="input-field" placeholder="New Dev Points (0-100)" style="margin-bottom: 0;">
+                <button class="btn-custom" style="width: auto; margin-bottom: 0; padding: 0 16px; background: #ffbe0b;" onclick="adminUpdateDevPoints()">Set Points</button>
             </div>
         </div>
 
@@ -370,6 +380,23 @@
         let targetUsername = "";
         let isFollowing = false;
         let profileUnsubscribe = null;
+
+        function renderProfileMedia(url) {
+            const container = document.getElementById("profile-pfp-container");
+            const trimmedUrl = url ? url.trim() : "";
+
+            if (trimmedUrl !== "" && (trimmedUrl.toLowerCase().endsWith(".mp4") || trimmedUrl.includes(".mp4?"))) {
+                container.innerHTML = `
+                    <video autoplay loop muted playsinline class="profile-pfp-video" onerror="this.outerHTML='<img id=\\'profile-pfp-display\\' src=\\'people.png\\' alt=\\'Profile Picture\\' class=\\'profile-pfp-img\\' onerror=\\'this.src=\\'people.png\\'\\'>'">
+                        <source src="${trimmedUrl}" type="video/mp4">
+                    </video>
+                `;
+            } else {
+                container.innerHTML = `
+                    <img id="profile-pfp-display" src="${trimmedUrl !== "" ? trimmedUrl : "people.png"}" alt="Profile Picture" class="profile-pfp-img" onerror="this.src='people.png'">
+                `;
+            }
+        }
 
         async function initProfile() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -418,12 +445,12 @@
                     return;
                 }
 
-                // Check auth state for follow button & admin panel visibility
+                // Check auth state for follow button & admin panels visibility
                 firebase.auth().onAuthStateChanged(async (currentUser) => {
                     if (currentUser) {
-                        // Show admin badge manager if current logged-in user is admin
                         if (currentUser.uid === ADMIN_UID) {
                             document.getElementById("admin-badge-management").style.display = "block";
+                            document.getElementById("admin-devpoints-management").style.display = "block";
                         }
 
                         if (currentUser.uid === targetUserId) {
@@ -463,12 +490,8 @@
                             document.getElementById("main-profile-container").style.backgroundColor = targetUserData.profileColor;
                         }
 
-                        const pfpImg = document.getElementById("profile-pfp-display");
-                        if (targetUserData.pfpUrl && targetUserData.pfpUrl.trim() !== "") {
-                            pfpImg.src = targetUserData.pfpUrl;
-                        } else {
-                            pfpImg.src = "people.png";
-                        }
+                        // Render profile picture or .mp4 video
+                        renderProfileMedia(targetUserData.pfpUrl);
 
                         const followersList = Array.isArray(targetUserData.followers) ? targetUserData.followers : (Array.isArray(targetUserData.Followers) ? targetUserData.Followers : []);
                         const followingList = Array.isArray(targetUserData.following) ? targetUserData.following : (Array.isArray(targetUserData.Following) ? targetUserData.Following : []);
@@ -476,11 +499,15 @@
                         document.getElementById("followers-count").innerText = followersList.length;
                         document.getElementById("following-count").innerText = followingList.length;
 
+                        // Display Dev Points in social stats and prefill input
+                        const devPoints = targetUserData.devPoints !== undefined ? targetUserData.devPoints : 100;
+                        document.getElementById("dev-points-display").innerText = devPoints;
+                        document.getElementById("admin-devpoints-input").value = devPoints;
+
                         // Render badges
                         renderBadgesUI(targetUserData.badges || []);
                         renderAdminBadgesManager(targetUserData.badges || []);
 
-                        const devPoints = targetUserData.devPoints !== undefined ? targetUserData.devPoints : 100;
                         const isBanned = targetUserData.isBanned === true || devPoints <= 79;
 
                         const gamesListEl = document.getElementById("user-games-list");
@@ -599,6 +626,32 @@
                 renderAdminBadgesManager(targetUserData.badges);
             } catch (err) {
                 alert("Error removing badge: " + err.message);
+            }
+        }
+
+        async function adminUpdateDevPoints() {
+            const input = document.getElementById("admin-devpoints-input");
+            const newPoints = parseInt(input.value, 10);
+
+            if (isNaN(newPoints) || newPoints < 0 || newPoints > 100) {
+                alert("Please enter a valid Dev Points value between 0 and 100.");
+                return;
+            }
+
+            if (!targetUserId) return;
+
+            try {
+                let updatePayload = { devPoints: newPoints };
+                if (newPoints <= 79) {
+                    updatePayload.isBanned = true;
+                } else {
+                    updatePayload.isBanned = false; // unban if points are restored above 79
+                }
+
+                await db.collection("users").doc(targetUserId).update(updatePayload);
+                alert(`Successfully updated Dev Points to ${newPoints}.`);
+            } catch (err) {
+                alert("Error updating Dev Points: " + err.message);
             }
         }
 
